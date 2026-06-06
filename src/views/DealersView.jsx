@@ -16,8 +16,8 @@ export default function DealersView({ userRole }) {
   // New customer registration fields
   const [newCust, setNewCust] = useState({
     name: '', age: '', gender: 'Male', phone: '', email: '', address: '',
-    roofType: 'Concrete Flat Roof', projectSize: 3, inverterBrand: 'Growatt',
-    panelBrand: 'Waaree (Mono PERC)', loanRequired: 'No', loanAmount: '',
+    roofType: 'Concrete Flat Roof', projectSize: 3, inverterBrand: 'APS',
+    panelBrand: 'APS', loanRequired: 'No', loanAmount: '',
     coApplicantName: '', coApplicantPhone: '', coApplicantRelation: ''
   });
 
@@ -98,8 +98,8 @@ export default function DealersView({ userRole }) {
     setIsAddCustomerOpen(false);
     setNewCust({
       name: '', age: '', gender: 'Male', phone: '', email: '', address: '',
-      roofType: 'Concrete Flat Roof', projectSize: 3, inverterBrand: 'Growatt',
-      panelBrand: 'Waaree (Mono PERC)', loanRequired: 'No', loanAmount: '',
+      roofType: 'Concrete Flat Roof', projectSize: 3, inverterBrand: 'APS',
+      panelBrand: 'APS', loanRequired: 'No', loanAmount: '',
       coApplicantName: '', coApplicantPhone: '', coApplicantRelation: ''
     });
     refreshDb();
@@ -472,9 +472,8 @@ export default function DealersView({ userRole }) {
                 value={newCust.inverterBrand}
                 onChange={(e) => setNewCust({ ...newCust, inverterBrand: e.target.value })}
               >
-                <option value="Growatt">Growatt (Recommended)</option>
-                <option value="Solis">Solis</option>
-                <option value="Deye">Deye Hybrid</option>
+                <option value="APS">APS (Recommended)</option>
+                <option value="Deye">Deye</option>
               </select>
             </div>
             <div className="form-group">
@@ -484,9 +483,9 @@ export default function DealersView({ userRole }) {
                 value={newCust.panelBrand}
                 onChange={(e) => setNewCust({ ...newCust, panelBrand: e.target.value })}
               >
-                <option value="Waaree (Mono PERC)">Waaree (Mono PERC)</option>
-                <option value="Adani Solar (Mono PERC)">Adani Solar (Mono PERC)</option>
-                <option value="Tata Power Solar">Tata Power Solar</option>
+                <option value="APS">APS (Recommended)</option>
+                <option value="Waaree Solar">Waaree Solar</option>
+                <option value="Adani">Adani</option>
               </select>
             </div>
           </div>
