@@ -1,13 +1,49 @@
 // LeadsView.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { 
-  getLeads, saveLead, deleteLead, logNotification, uploadFileToServer, getUploadUrl
+  getLeads, saveLead, deleteLead, logNotification, uploadFileToServer, getUploadUrl, getDb
 } from '../db/mockDb';
+import { jsPDF } from 'jspdf';
 import Modal from '../components/Modal';
 import { 
   Search, Plus, FileText, CheckCircle2, ChevronRight, Edit3, Trash2,
   Phone, Mail, MapPin, UploadCloud, Check, UserPlus
 } from 'lucide-react';
+
+// Helper to convert image URL to base64
+const loadImageAsBase64 = (url) => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = 'Anonymous';
+    img.src = url;
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      resolve(canvas.toDataURL('image/png'));
+    };
+    img.onerror = () => {
+      resolve(null);
+    };
+  });
+};
+
+const getSignatureImage = async (lead) => {
+  const sig = lead.documents?.signature;
+  if (!sig || !sig.uploaded) return null;
+  if (sig.dataUrl) return sig.dataUrl;
+  
+  const url = getUploadUrl(sig.name);
+  try {
+    const dataUrl = await loadImageAsBase64(url);
+    return dataUrl;
+  } catch (e) {
+    console.error('Failed to load signature image:', e);
+    return null;
+  }
+};
 
 export default function LeadsView() {
   const [leads, setLeads] = useState(getLeads());
@@ -168,17 +204,546 @@ export default function LeadsView() {
 
   const saveSignature = () => {
     if (!activeLead) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const dataUrl = canvas.toDataURL('image/png');
     const updatedLead = {
       ...activeLead,
       documents: {
         ...activeLead.documents,
-        signature: { name: 'customer_signed_canvas.png', uploaded: true }
+        signature: { name: 'customer_signed_canvas.png', uploaded: true, dataUrl: dataUrl }
       }
     };
     saveLead(updatedLead);
     setActiveLead(updatedLead);
     refreshLeads();
     alert('Customer digital signature saved to DMS successfully!');
+  };
+
+  const generateVendorFeasibility = async (lead) => {
+    if (!lead) return;
+    
+    // Look up site survey in the database
+    const dbInstance = getDb();
+    const survey = dbInstance.surveys?.find(s => s.leadId === lead.id) || null;
+    
+    const doc = new jsPDF();
+    const primaryColor = [11, 15, 23]; // Dark Slate
+    const accentColor = [16, 185, 129]; // Emerald Green
+    
+    // Header banner
+    doc.setFillColor(...primaryColor);
+    doc.rect(0, 0, 210, 40, 'F');
+    
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('Helvetica', 'bold');
+    doc.setFontSize(22);
+    doc.text('GREENVOLTES ENERGY SOLUTIONS LLP', 15, 18);
+    
+    doc.setFontSize(9);
+    doc.setFont('Helvetica', 'normal');
+    doc.text('Corporate Solar EPC Partner | Kochi, Kerala | Reg: GV-VEND-KL-021', 15, 26);
+    doc.text('PM-Surya Ghar Authorized System Integrator | support@greenvoltes.in', 15, 32);
+    
+    // Document Title
+    doc.setTextColor(...accentColor);
+    doc.setFontSize(15);
+    doc.setFont('Helvetica', 'bold');
+    doc.text('TECHNICAL SURVEY & VENDOR FEASIBILITY CERTIFICATE', 15, 52);
+    
+    // Horizontal Line
+    doc.setDrawColor(200, 200, 200);
+    doc.line(15, 56, 195, 56);
+    
+    // Section: Meta Info
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(9);
+    doc.setFont('Helvetica', 'normal');
+    doc.text(`Lead ID: ${lead.id}`, 15, 63);
+    doc.text(`Certificate Date: ${new Date().toLocaleDateString('en-IN')}`, 15, 69);
+    doc.text(`Survey Ref: ${survey ? survey.id : 'GV-FS-MOCK-2026'}`, 140, 63);
+    doc.text(`KSEB License: Class A Electrical`, 140, 69);
+    
+    // Section 1: Customer Details Table
+    doc.setFillColor(240, 240, 240);
+    doc.rect(15, 76, 180, 8, 'F');
+    doc.setFont('Helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.text('1. CUSTOMER & SITE DETAILS', 18, 81.5);
+    
+    doc.setFont('Helvetica', 'normal');
+    doc.setFontSize(9.5);
+    let y = 91;
+    doc.text(`Full Name:`, 15, y);
+    doc.setFont('Helvetica', 'bold');
+    doc.text(lead.name, 50, y);
+    
+    doc.setFont('Helvetica', 'normal');
+    y += 7;
+    doc.text(`Mobile Number:`, 15, y);
+    doc.text(lead.mobile, 50, y);
+    
+    y += 7;
+    doc.text(`Email Address:`, 15, y);
+    doc.text(lead.email || 'N/A', 50, y);
+    
+    y += 7;
+    doc.text(`Site Address:`, 15, y);
+    const splitAddr = doc.splitTextToSize(`${lead.address}, ${lead.district}, Pin: ${lead.pincode}`, 140);
+    doc.text(splitAddr, 50, y);
+    
+    y += (splitAddr.length * 5) + 3;
+    
+    // Section 2: Technical Feasibility Parameters
+    doc.setFillColor(240, 240, 240);
+    doc.rect(15, y, 180, 8, 'F');
+    doc.setFont('Helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.text('2. SITE TECHNICAL PARAMETERS', 18, y + 5.5);
+    
+    doc.setFont('Helvetica', 'normal');
+    doc.setFontSize(9.5);
+    y += 15;
+    doc.text(`Roof Type:`, 15, y);
+    doc.text(survey ? survey.roofType : 'Concrete Flat Roof', 75, y);
+    
+    y += 7;
+    doc.text(`Available Roof Area:`, 15, y);
+    doc.text(survey ? `${survey.roofArea} Sq.Ft` : '450 Sq.Ft (Standard)', 75, y);
+    
+    y += 7;
+    doc.text(`GPS Coordinates:`, 15, y);
+    doc.text(survey ? survey.gpsCoordinates : '9.9312° N, 76.2673° E', 75, y);
+    
+    y += 7;
+    doc.text(`Connected Phase Type:`, 15, y);
+    doc.text(survey ? survey.phaseType : 'Single Phase', 75, y);
+    
+    y += 7;
+    doc.text(`Sanctioned Connection Load:`, 15, y);
+    doc.text(survey ? `${survey.sanctionedLoad} kW` : '3.0 kW', 75, y);
+    
+    y += 7;
+    doc.text(`Shadow & Obstruction Analysis:`, 15, y);
+    doc.text(survey ? (survey.shadowAnalysis || 'Clear Southern Sky') : 'Negligible shadow / Highly feasible', 75, y);
+    
+    // Section 3: Engineering Conclusion
+    y += 12;
+    doc.setFillColor(240, 240, 240);
+    doc.rect(15, y, 180, 8, 'F');
+    doc.setFont('Helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.text('3. ENGINEERING FEASIBILITY VERIFICATION', 18, y + 5.5);
+    
+    doc.setFont('Helvetica', 'normal');
+    doc.setFontSize(9.5);
+    y += 15;
+    doc.text(`Recommended Capacity:`, 15, y);
+    doc.setFont('Helvetica', 'bold');
+    doc.setTextColor(...accentColor);
+    doc.text(survey ? `${survey.recommendedCapacity} kWp` : '3.0 kWp', 75, y);
+    
+    doc.setTextColor(0, 0, 0);
+    doc.setFont('Helvetica', 'normal');
+    y += 7;
+    doc.text(`Monthly Energy Generation (Est):`, 15, y);
+    doc.text(survey ? `~${survey.estGeneration} kWh / Units` : '~360 kWh / Units', 75, y);
+    
+    y += 7;
+    doc.text(`Feasibility Outcome:`, 15, y);
+    doc.setFont('Helvetica', 'bold');
+    doc.setTextColor(22, 163, 74);
+    doc.text(`CERTIFIED FEASIBLE`, 75, y);
+    
+    doc.setTextColor(0, 0, 0);
+    doc.setFont('Helvetica', 'normal');
+    y += 7;
+    doc.text(`Remarks:`, 15, y);
+    const splitRemarks = doc.splitTextToSize(survey ? (survey.engineerRemarks || 'Site meets all standards.') : 'Roof has excellent solar access. Suitable for standard GI structural rails. Direct grid feed connection recommended.', 120);
+    doc.text(splitRemarks, 75, y);
+    
+    // Signatures
+    doc.setFontSize(10);
+    y = 240;
+    
+    // First Party
+    doc.setFont('Helvetica', 'bold');
+    doc.text('First Party (Consumer Signature)', 15, y);
+    doc.setFont('Helvetica', 'normal');
+    doc.line(15, y + 16, 75, y + 16);
+    
+    if (lead.documents.signature.uploaded) {
+      const sigDataUrl = lead.documents.signature.dataUrl || (lead.documents.signature.name ? await getSignatureImage(lead) : null);
+      if (sigDataUrl) {
+        try {
+          doc.addImage(sigDataUrl, 'PNG', 18, y + 1, 40, 14);
+        } catch (e) {
+          console.error('Failed to render signature in PDF:', e);
+          doc.text('(Drawn Digitally)', 25, y + 10);
+        }
+      } else {
+        doc.text('(Signed in DMS)', 25, y + 10);
+      }
+    } else {
+      doc.setFontSize(8);
+      doc.setTextColor(150, 150, 150);
+      doc.text('[Awaiting Signature Capture]', 22, y + 10);
+      doc.setTextColor(0, 0, 0);
+      doc.setFontSize(10);
+    }
+    
+    // Vendor
+    doc.setFont('Helvetica', 'bold');
+    doc.text('For Greenvolt Energy Solutions LLP', 120, y);
+    doc.setFont('Helvetica', 'normal');
+    doc.line(120, y + 16, 185, y + 16);
+    doc.text('Authorized Technical Signatory', 120, y + 21);
+    
+    doc.setFont('Courier', 'italic');
+    doc.setTextColor(...accentColor);
+    doc.text('GREENVOLTES SEAL', 130, y + 10);
+    doc.setTextColor(0, 0, 0);
+    doc.setFont('Helvetica', 'normal');
+    
+    doc.save(`Feasibility_Report_${lead.id}.pdf`);
+  };
+
+  const generateVendorAgreement = async (lead) => {
+    if (!lead) return;
+    
+    // Look up site survey and quotation in the database
+    const dbInstance = getDb();
+    const survey = dbInstance.surveys?.find(s => s.leadId === lead.id) || null;
+    const quote = dbInstance.quotations?.find(q => q.leadId === lead.id && q.status === 'Accepted') || 
+                  dbInstance.quotations?.find(q => q.leadId === lead.id) || null;
+                  
+    const systemSize = quote ? quote.projectSize : (survey ? survey.recommendedCapacity : 3);
+    
+    // Financials calculation (fallback to default if no quote exists)
+    let basePrice = 165000;
+    let gstRate = 13.8;
+    let gstAmount = 22770;
+    let netPrice = 187770;
+    let subsidyExpected = 78000;
+    let customerShare = 109770;
+    
+    if (quote) {
+      basePrice = quote.basePrice;
+      gstRate = quote.gstRate;
+      gstAmount = quote.gstAmount;
+      netPrice = quote.netPrice;
+      subsidyExpected = quote.subsidyExpected;
+      customerShare = quote.customerShare;
+    } else {
+      if (systemSize === 1) {
+        basePrice = 65000; gstAmount = 8970; netPrice = 73970; subsidyExpected = 30000; customerShare = 43970;
+      } else if (systemSize === 2) {
+        basePrice = 115000; gstAmount = 15870; netPrice = 130870; subsidyExpected = 60000; customerShare = 70870;
+      } else if (systemSize >= 3) {
+        basePrice = systemSize * 55000;
+        gstAmount = Math.round(basePrice * 0.138);
+        netPrice = basePrice + gstAmount;
+        subsidyExpected = 78000;
+        customerShare = netPrice - subsidyExpected;
+      }
+    }
+    
+    const doc = new jsPDF();
+    const primaryColor = [11, 15, 23]; // Dark Slate
+    const accentColor = [16, 185, 129]; // Emerald Green
+    
+    // ==========================================
+    // PAGE 1: HEADER & CONTRACT DETAILS
+    // ==========================================
+    
+    // Header banner
+    doc.setFillColor(...primaryColor);
+    doc.rect(0, 0, 210, 35, 'F');
+    
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('Helvetica', 'bold');
+    doc.setFontSize(20);
+    doc.text('GREENVOLTES ENERGY SOLUTIONS LLP', 15, 16);
+    
+    doc.setFontSize(8.5);
+    doc.setFont('Helvetica', 'normal');
+    doc.text('Empanelled Solar EPC Vendor | GSTIN: 32AABCDE1234F1Z1 | Reg: GV-VEND-KL-021', 15, 23);
+    doc.text('Kochi HO: Kakkanad, Ernakulam, Kerala - 682030 | crm.greenvoltes.in', 15, 28);
+    
+    // Agreement Title
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(13);
+    doc.setFont('Helvetica', 'bold');
+    doc.text('AGREEMENT BETWEEN CONSUMER & VENDOR FOR INSTALLATION OF RTS PROJECT', 15, 48);
+    doc.setFontSize(10.5);
+    doc.setTextColor(...accentColor);
+    doc.text('UNDER PM - SURYA GHAR: MUFT BIJLI YOJANA', 15, 53);
+    
+    doc.setDrawColor(200, 200, 200);
+    doc.line(15, 56, 195, 56);
+    
+    // Section: Agreement Execution Details
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(9.5);
+    doc.setFont('Helvetica', 'normal');
+    
+    const execText = `This agreement is executed on this ${new Date().getDate()} day of ${new Date().toLocaleString('en-IN', { month: 'long' })}, ${new Date().getFullYear()} for the design, supply, installation, testing, commissioning, and 5-year Comprehensive Maintenance Contract (CMC) of a grid-connected rooftop solar (RTS) power plant under the PM-Surya Ghar Scheme.`;
+    const splitExec = doc.splitTextToSize(execText, 180);
+    doc.text(splitExec, 15, 63);
+    
+    let y = 63 + (splitExec.length * 5) + 5;
+    
+    // Part A: First Party (Consumer)
+    doc.setFont('Helvetica', 'bold');
+    doc.text('BETWEEN (First Party - Consumer):', 15, y);
+    doc.setFont('Helvetica', 'normal');
+    doc.text(`Name: ${lead.name}`, 15, y + 6);
+    doc.text(`Contact: +91-${lead.mobile}`, 15, y + 11);
+    
+    const clientAddress = `Installation Address: ${lead.address}, ${lead.district}, Pin: ${lead.pincode}, Kerala`;
+    const splitAddr = doc.splitTextToSize(clientAddress, 180);
+    doc.text(splitAddr, 15, y + 16);
+    
+    y = y + 16 + (splitAddr.length * 5) + 3;
+    
+    // Part B: Second Party (Vendor)
+    doc.setFont('Helvetica', 'bold');
+    doc.text('AND (Second Party - Empanelled Vendor):', 15, y);
+    doc.setFont('Helvetica', 'normal');
+    doc.text('Company Name: Greenvolt Energy Solutions LLP', 15, y + 6);
+    doc.text('Registered Office: Kakkanad, Ernakulam, KL - 682030', 15, y + 11);
+    doc.text('Empanelment Reference ID: GV-VEND-KL-021 (Approved by ANERT / MNRE)', 15, y + 16);
+    
+    y = y + 26;
+    
+    // Section 1: Scope & Technical Parameters Table
+    doc.setFillColor(240, 240, 240);
+    doc.rect(15, y, 180, 7, 'F');
+    doc.setFont('Helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.text('1. PROJECT CAPACITY & EQUIPMENT STANDARD', 18, y + 5);
+    
+    doc.setFont('Helvetica', 'normal');
+    doc.setFontSize(9);
+    y += 12;
+    doc.text(`RTS Plant Capacity:`, 15, y);
+    doc.setFont('Helvetica', 'bold');
+    doc.text(`${systemSize} kWp Grid-Tied Solar System`, 75, y);
+    
+    doc.setFont('Helvetica', 'normal');
+    y += 6;
+    doc.text(`Solar Modules Brand:`, 15, y);
+    doc.text(quote ? quote.panelBrand : 'Waaree (Mono PERC - DCR compliant)', 75, y);
+    
+    y += 6;
+    doc.text(`Grid-tied Inverter Brand:`, 15, y);
+    doc.text(quote ? quote.inverterBrand : 'Growatt / Solis (Dual MPPT)', 75, y);
+    
+    y += 6;
+    doc.text(`Mounting Structure:`, 15, y);
+    doc.text('Hot-dip Galvanized Iron Structure (Wind-resistant up to 150 km/h)', 75, y);
+    
+    y += 10;
+    
+    // Section 2: Financial Terms & Subsidy
+    doc.setFillColor(240, 240, 240);
+    doc.rect(15, y, 180, 7, 'F');
+    doc.setFont('Helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.text('2. CONTRACT PRICING & SUBSIDY DETAILS', 18, y + 5);
+    
+    doc.setFont('Helvetica', 'normal');
+    doc.setFontSize(9);
+    y += 12;
+    doc.text(`Total Base EPC Contract Value:`, 15, y);
+    doc.text(`Rs. ${basePrice.toLocaleString('en-IN')}`, 75, y);
+    
+    y += 6;
+    doc.text(`Split GST tax amount (${gstRate}% rate):`, 15, y);
+    doc.text(`Rs. ${gstAmount.toLocaleString('en-IN')}`, 75, y);
+    
+    y += 6;
+    doc.text(`Gross Project Billing Value (Contract Price):`, 15, y);
+    doc.setFont('Helvetica', 'bold');
+    doc.text(`Rs. ${netPrice.toLocaleString('en-IN')}`, 75, y);
+    
+    doc.setFont('Helvetica', 'normal');
+    y += 6;
+    doc.text(`Expected Central Government MNRE Subsidy:`, 15, y);
+    doc.setFont('Helvetica', 'bold');
+    doc.setTextColor(...accentColor);
+    doc.text(`- Rs. ${subsidyExpected.toLocaleString('en-IN')}`, 75, y);
+    
+    doc.setTextColor(0, 0, 0);
+    doc.setFont('Helvetica', 'normal');
+    y += 6;
+    doc.text(`Net Consumer Out-of-Pocket Share:`, 15, y);
+    doc.setFont('Helvetica', 'bold');
+    doc.text(`Rs. ${customerShare.toLocaleString('en-IN')}`, 75, y);
+    
+    // Footer line for page 1
+    doc.setFont('Helvetica', 'normal');
+    doc.setFontSize(7.5);
+    doc.setTextColor(150, 150, 150);
+    doc.text('Page 1 of 2 - Confidentially Executed between Consumer and Greenvoltes', 15, 285);
+    
+    // ==========================================
+    // PAGE 2: OBLIGATIONS & SIGNATURES
+    // ==========================================
+    doc.addPage();
+    doc.setTextColor(0, 0, 0);
+    
+    // Page 2 header
+    doc.setFont('Helvetica', 'bold');
+    doc.setFontSize(10.5);
+    doc.text('GREENVOLTES SOLAR CARE - MODEL CONTRACT', 15, 15);
+    doc.setDrawColor(200, 200, 200);
+    doc.line(15, 17, 195, 17);
+    
+    y = 25;
+    
+    // Section 3: First Party Obligations
+    doc.setFillColor(240, 240, 240);
+    doc.rect(15, y, 180, 7, 'F');
+    doc.setFont('Helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.text('3. FIRST PARTY (CONSUMER) OBLIGATIONS', 18, y + 5);
+    
+    doc.setFont('Helvetica', 'normal');
+    doc.setFontSize(8.5);
+    y += 11;
+    const obligationsFirst = [
+      '1. Provide clear and shadow-free roof access to the vendor for structural mounting and panel layout setup.',
+      '2. Provide safe, secure dry storage for all plant materials (panels, inverter, structures) delivered to the premises prior to construction.',
+      '3. Submit KSEB Net-Metering applications and clear KSEB application fee receipts as required.',
+      '4. Disburse milestone payments on time: 50% advance on sign-off, 40% on material delivery, 10% post net-meter grid syncing.'
+    ];
+    obligationsFirst.forEach(o => {
+      doc.text(o, 15, y);
+      y += 5.5;
+    });
+    
+    y += 3;
+    
+    // Section 4: Second Party Obligations
+    doc.setFillColor(240, 240, 240);
+    doc.rect(15, y, 180, 7, 'F');
+    doc.setFont('Helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.text('4. SECOND PARTY (VENDOR) OBLIGATIONS', 18, y + 5);
+    
+    doc.setFont('Helvetica', 'normal');
+    doc.setFontSize(8.5);
+    y += 11;
+    const obligationsSecond = [
+      '1. Complete structural mounting, cable conduits, inverter configuration, and KSEB inspection preparation within 45 days.',
+      '2. Ensure all parts used (panels, inverter, protection boxes) comply with MNRE solar standard safety and DCR rules.',
+      '3. Provide KSEB Net-Metering inspection coordination and upload completion files to the PM-Surya Ghar national portal.',
+      '4. Provide 5 years of free Comprehensive Maintenance Services (including half-yearly checkups and panel cleaning tutorials).'
+    ];
+    obligationsSecond.forEach(o => {
+      doc.text(o, 15, y);
+      y += 5.5;
+    });
+    
+    y += 3;
+    
+    // Section 5: Component Warranty Table
+    doc.setFillColor(240, 240, 240);
+    doc.rect(15, y, 180, 7, 'F');
+    doc.setFont('Helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.text('5. MANUFACTURER WARRANTY TERMS', 18, y + 5);
+    
+    doc.setFont('Helvetica', 'normal');
+    doc.setFontSize(8.5);
+    y += 11;
+    doc.setFont('Helvetica', 'bold');
+    doc.text('Component', 16, y);
+    doc.text('Warranty Period', 70, y);
+    doc.text('Details', 120, y);
+    doc.setFont('Helvetica', 'normal');
+    doc.line(15, y + 2, 195, y + 2);
+    
+    y += 7;
+    doc.text('Solar Panels', 16, y);
+    doc.text('25 Years', 70, y);
+    doc.text('Linear performance output guaranteed above 80% after 25 years.', 120, y);
+    
+    y += 5.5;
+    doc.text('Grid-tied Inverter', 16, y);
+    doc.text('5 Years', 70, y);
+    doc.text('Comprehensive product replacement warranty against electronic faults.', 120, y);
+    
+    y += 5.5;
+    doc.text('Mounting Structures', 16, y);
+    doc.text('10 Years', 70, y);
+    doc.text('Structural warranty against corrosion, wind damage, and mechanical failure.', 120, y);
+    
+    y += 12;
+    
+    // Section 6: Legal & Dispute Resolution
+    doc.setFillColor(240, 240, 240);
+    doc.rect(15, y, 180, 7, 'F');
+    doc.setFont('Helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.text('6. GENERAL TERMS & JURISDICTION', 18, y + 5);
+    
+    doc.setFont('Helvetica', 'normal');
+    doc.setFontSize(8.5);
+    y += 11;
+    const splitGeneral = doc.splitTextToSize('This contract is legally binding under the PM-Surya Ghar guidelines. Any disputes arising between the customer and vendor shall first be addressed through mutual discussion, failing which they shall be referred to arbitration in accordance with the Indian Arbitration and Conciliation Act, and subject to the exclusive jurisdiction of the courts at Ernakulam, Kerala.', 180);
+    doc.text(splitGeneral, 15, y);
+    
+    y = 230;
+    doc.setFontSize(10);
+    
+    // Signature lines
+    doc.setFont('Helvetica', 'bold');
+    doc.text('First Party (Consumer Signature)', 15, y);
+    doc.setFont('Helvetica', 'normal');
+    doc.line(15, y + 16, 75, y + 16);
+    
+    if (lead.documents.signature.uploaded) {
+      const sigDataUrl = lead.documents.signature.dataUrl || (lead.documents.signature.name ? await getSignatureImage(lead) : null);
+      if (sigDataUrl) {
+        try {
+          doc.addImage(sigDataUrl, 'PNG', 18, y + 1, 40, 14);
+        } catch (e) {
+          console.error('Failed to render signature in PDF:', e);
+          doc.text('(Drawn Digitally)', 25, y + 10);
+        }
+      } else {
+        doc.text('(Signed in DMS)', 25, y + 10);
+      }
+    } else {
+      doc.setFontSize(8);
+      doc.setTextColor(150, 150, 150);
+      doc.text('[Awaiting Signature Capture]', 22, y + 10);
+      doc.setTextColor(0, 0, 0);
+      doc.setFontSize(10);
+    }
+    
+    // Vendor Signature
+    doc.setFont('Helvetica', 'bold');
+    doc.text('Second Party (For Greenvoltes)', 120, y);
+    doc.setFont('Helvetica', 'normal');
+    doc.line(120, y + 16, 185, y + 16);
+    doc.text('Authorized Commercial Signatory', 120, y + 21);
+    
+    doc.setFont('Courier', 'italic');
+    doc.setTextColor(...accentColor);
+    doc.text('GREENVOLTES CONTRACT SEAL', 125, y + 10);
+    doc.setTextColor(0, 0, 0);
+    doc.setFont('Helvetica', 'normal');
+    
+    // Page 2 footer
+    doc.setFont('Helvetica', 'normal');
+    doc.setFontSize(7.5);
+    doc.setTextColor(150, 150, 150);
+    doc.text('Page 2 of 2 - Confidentially Executed between Consumer and Greenvoltes', 15, 285);
+    
+    doc.save(`Vendor_Agreement_${lead.id}.pdf`);
   };
 
   const handleDelete = (id) => {
@@ -388,6 +953,20 @@ export default function LeadsView() {
                     </button>
                   </div>
                 )}
+              </div>
+
+              {/* Document Generation */}
+              <div className="detail-section">
+                <h4>Generate Contracts & Reports</h4>
+                <p style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '8px' }}>Export official feasibility assessments and consumer-vendor agreements:</p>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button className="btn btn-primary btn-sm" onClick={() => generateVendorFeasibility(activeLead)} style={{ flex: 1 }}>
+                    <FileText size={12} /> Feasibility Report
+                  </button>
+                  <button className="btn btn-primary btn-sm" onClick={() => generateVendorAgreement(activeLead)} style={{ flex: 1 }}>
+                    <FileText size={12} /> Vendor Agreement
+                  </button>
+                </div>
               </div>
             </div>
           </div>
