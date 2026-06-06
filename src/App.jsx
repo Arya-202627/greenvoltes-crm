@@ -66,6 +66,7 @@ function App() {
 
   const [loading, setLoading] = useState(true);
   const [syncTrigger, setSyncTrigger] = useState(0);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     // Initial fetch of the database from server
@@ -237,7 +238,17 @@ function App() {
         activeView={activeView} 
         setActiveView={setActiveView} 
         userRole={userRole} 
+        isOpen={sidebarOpen}
+        setIsOpen={setSidebarOpen}
       />
+
+      {/* Mobile Sidebar Overlay */}
+      {sidebarOpen && (
+        <div 
+          className="sidebar-overlay" 
+          onClick={() => setSidebarOpen(false)}
+        ></div>
+      )}
 
       {/* Top Header role controller bar */}
       <RoleSwitcher 
@@ -246,6 +257,7 @@ function App() {
         onRoleChange={handleRoleChange} 
         currentUser={currentUser}
         onLogout={handleLogout}
+        toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
       />
 
       {/* Main View Display Port */}

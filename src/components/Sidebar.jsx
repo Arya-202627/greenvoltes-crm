@@ -3,10 +3,10 @@ import React from 'react';
 import { 
   BarChart3, Users, Landmark, FileText, ClipboardList, Briefcase, 
   ShieldCheck, Banknote, Package, ShoppingCart, Wrench, UserCheck, 
-  IndianRupee, Activity, User, FolderClosed, BellRing, Settings
+  IndianRupee, Activity, User, FolderClosed, BellRing, Settings, X
 } from 'lucide-react';
 
-export default function Sidebar({ activeView, setActiveView, userRole }) {
+export default function Sidebar({ activeView, setActiveView, userRole, isOpen, setIsOpen }) {
   // Navigation list with icons and role access
   const allNavItems = [
     { id: 'ceo', label: 'CEO Dashboard', icon: BarChart3, roles: ['Admin', 'Sales Manager'] },
@@ -35,11 +35,14 @@ export default function Sidebar({ activeView, setActiveView, userRole }) {
     : allNavItems.filter(item => item.roles.includes(userRole));
 
   return (
-    <aside className="sidebar">
+    <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
       <div className="sidebar-brand">
         <div className="logo-container-wide">
           <img src="/logo.png" alt="Greenvolt Energy Solutions Logo" className="sidebar-logo-wide" />
         </div>
+        <button className="mobile-sidebar-close-btn" onClick={() => setIsOpen(false)} title="Close Menu">
+          <X size={20} />
+        </button>
       </div>
       
       <div className="sidebar-role-badge">
@@ -54,7 +57,10 @@ export default function Sidebar({ activeView, setActiveView, userRole }) {
           return (
             <button
               key={item.id}
-              onClick={() => setActiveView(item.id)}
+              onClick={() => {
+                setActiveView(item.id);
+                setIsOpen(false);
+              }}
               className={`sidebar-nav-item ${isActive ? 'active' : ''}`}
             >
               <IconComponent size={18} className="nav-icon" />
@@ -81,14 +87,17 @@ export default function Sidebar({ activeView, setActiveView, userRole }) {
           display: flex;
           flex-direction: column;
           z-index: 1000;
+          transition: transform var(--transition-normal);
         }
 
         .sidebar-brand {
           display: flex;
-          justify-content: center;
+          justify-content: space-between;
           align-items: center;
           padding: 16px;
           border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+          width: 100%;
+          box-sizing: border-box;
         }
 
         .logo-container-wide {
@@ -207,6 +216,39 @@ export default function Sidebar({ activeView, setActiveView, userRole }) {
         .version {
           font-weight: 600;
           margin-bottom: 2px;
+        }
+
+        .mobile-sidebar-close-btn {
+          display: none;
+          background: none;
+          border: none;
+          color: var(--text-secondary);
+          cursor: pointer;
+          padding: 8px;
+          align-items: center;
+          justify-content: center;
+          transition: color var(--transition-fast);
+        }
+
+        .mobile-sidebar-close-btn:hover {
+          color: var(--primary);
+        }
+
+        @media (max-width: 992px) {
+          .sidebar {
+            transform: translateX(-100%);
+            box-shadow: none;
+          }
+
+          .sidebar.open {
+            transform: translateX(0);
+            box-shadow: 4px 0 24px rgba(0, 0, 0, 0.5);
+          }
+
+          .mobile-sidebar-close-btn {
+            display: flex;
+            margin-left: 12px;
+          }
         }
       `}</style>
     </aside>

@@ -1,7 +1,7 @@
 import React from 'react';
-import { User, ShieldAlert, ShieldCheck, Cpu, RefreshCw } from 'lucide-react';
+import { User, ShieldAlert, ShieldCheck, Cpu, RefreshCw, Menu } from 'lucide-react';
 
-export default function RoleSwitcher({ userRole, setUserRole, onRoleChange, currentUser, onLogout }) {
+export default function RoleSwitcher({ userRole, setUserRole, onRoleChange, currentUser, onLogout, toggleSidebar }) {
   const roles = [
     'Admin',
     'Dealer',
@@ -28,6 +28,9 @@ export default function RoleSwitcher({ userRole, setUserRole, onRoleChange, curr
   return (
     <header className="role-switcher-header">
       <div className="header-left">
+        <button className="mobile-menu-toggle-btn" onClick={toggleSidebar} title="Open Menu">
+          <Menu size={20} />
+        </button>
         <Cpu className="sys-status-icon" size={16} style={{ color: '#22c55e' }} />
         <span className="sys-status-text">Server Connected</span>
         <span className="pulse-indicator" style={{ background: '#22c55e', boxShadow: '0 0 8px #22c55e' }}></span>
@@ -104,7 +107,29 @@ export default function RoleSwitcher({ userRole, setUserRole, onRoleChange, curr
         @media (max-width: 992px) {
           .role-switcher-header {
             left: 0;
+            padding: 0 16px;
           }
+          .mobile-menu-toggle-btn {
+            display: flex;
+          }
+        }
+
+        .mobile-menu-toggle-btn {
+          display: none;
+          background: none;
+          border: none;
+          color: var(--text-primary);
+          cursor: pointer;
+          padding: 8px;
+          margin-right: 8px;
+          align-items: center;
+          justify-content: center;
+          border-radius: var(--radius-sm);
+          transition: background-color var(--transition-fast);
+        }
+
+        .mobile-menu-toggle-btn:hover {
+          background-color: rgba(255, 255, 255, 0.05);
         }
 
         .header-left {

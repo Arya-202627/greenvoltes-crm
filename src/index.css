@@ -569,3 +569,16 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: 4px;
   cursor: pointer;
 }
+
+/* Mobile Sidebar Overlay */
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 998; /* Below sidebar (1000), above general content */
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
