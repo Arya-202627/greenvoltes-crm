@@ -106,6 +106,54 @@ function initializeDatabase() {
   });
 }
 
+// Sync and update users and dealers to ensure latest credentials and profiles are active
+function syncUsersAndDealersOnStartup() {
+  console.log('Synchronizing users and dealer profiles with latest server codebase...');
+  db.serialize(() => {
+    // 1. Clear and reload all users to ensure passwords/roles match server.js source code
+    db.run("DELETE FROM collections WHERE key = 'users'", (err) => {
+      if (err) console.error('Error clearing users:', err);
+    });
+    const stmtUser = db.prepare('INSERT OR REPLACE INTO collections (key, id, data) VALUES (?, ?, ?)');
+    defaultData.users.forEach((user) => {
+      stmtUser.run('users', user.id, JSON.stringify(user));
+    });
+    stmtUser.finalize((err) => {
+      if (err) console.error('Error finalising user insertion:', err);
+      else console.log('Successfully synchronized user credentials database table.');
+    });
+
+    // 2. Synchronize dealers: update existing properties or insert if missing
+    defaultData.dealers.forEach((dealer) => {
+      db.get("SELECT data FROM collections WHERE key = 'dealers' AND id = ?", [dealer.id], (err, row) => {
+        if (!err) {
+          if (row) {
+            try {
+              const existing = JSON.parse(row.data);
+              const merged = {
+                ...existing,
+                name: dealer.name,
+                contactPerson: dealer.contactPerson,
+                mobile: dealer.mobile,
+                email: dealer.email,
+                district: dealer.district,
+                state: dealer.state,
+                assignedTerritory: dealer.assignedTerritory,
+                commissionRate: dealer.commissionRate
+              };
+              db.run("UPDATE collections SET data = ? WHERE key = 'dealers' AND id = ?", [JSON.stringify(merged), dealer.id]);
+            } catch (e) {
+              console.error('Error parsing dealer data:', e);
+            }
+          } else {
+            db.run("INSERT INTO collections (key, id, data) VALUES ('dealers', ?, ?)", [dealer.id, JSON.stringify(dealer)]);
+          }
+        }
+      });
+    });
+  });
+}
+
 // Pre-populate database with default Kerala-specific data from mockDb if empty
 function checkAndSeedData() {
   db.get('SELECT COUNT(*) as count FROM collections', (err, row) => {
@@ -118,14 +166,8 @@ function checkAndSeedData() {
       console.log('Database empty. Seeding default Kerala-specific mock data...');
       seedDefaultData();
     } else {
-      console.log(`Database already contains ${row.count} records. Checking if users are seeded...`);
-      // Make sure users are present in database (for backwards compatibility if database was seeded in previous turn)
-      db.get("SELECT COUNT(*) as count FROM collections WHERE key = 'users'", (userErr, userRow) => {
-        if (!userErr && userRow.count === 0) {
-          console.log('Users missing from database. Seeding default user credentials...');
-          seedUsersOnly();
-        }
-      });
+      console.log(`Database already contains ${row.count} records. Performing user & dealer sync...`);
+      syncUsersAndDealersOnStartup();
     }
   });
 }
