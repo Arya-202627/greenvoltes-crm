@@ -104,16 +104,6 @@ export default function RoleSwitcher({ userRole, setUserRole, onRoleChange, curr
           transition: left var(--transition-normal);
         }
 
-        @media (max-width: 992px) {
-          .role-switcher-header {
-            left: 0;
-            padding: 0 16px;
-          }
-          .mobile-menu-toggle-btn {
-            display: flex;
-          }
-        }
-
         .mobile-menu-toggle-btn {
           display: none;
           background: none;
@@ -170,31 +160,6 @@ export default function RoleSwitcher({ userRole, setUserRole, onRoleChange, curr
           display: flex;
           align-items: center;
           gap: 6px;
-        }
-
-        @media (max-width: 768px) {
-          .time-display {
-            display: none;
-          }
-          .sys-status-text {
-            display: none;
-          }
-          .profile-name {
-            display: none;
-          }
-          .header-refresh-btn span {
-            display: none;
-          }
-          .header-refresh-btn {
-            padding: 6px 8px;
-          }
-          .role-dropdown {
-            font-size: 11px;
-            padding: 6px 8px 6px 0;
-          }
-          .role-select-container {
-            padding: 0 4px;
-          }
         }
 
         .time-sep {
@@ -322,6 +287,42 @@ export default function RoleSwitcher({ userRole, setUserRole, onRoleChange, curr
           color: #fff;
           border-color: #ef4444;
           box-shadow: 0 0 6px #ef4444;
+        }
+
+        /* Responsive Media Queries (Defined last to take precedence) */
+        @media (max-width: 992px) {
+          .role-switcher-header {
+            left: 0;
+            padding: 0 16px;
+          }
+          .mobile-menu-toggle-btn {
+            display: flex;
+          }
+        }
+
+        @media (max-width: 768px) {
+          .time-display {
+            display: none;
+          }
+          .sys-status-text {
+            display: none;
+          }
+          .profile-name {
+            display: none;
+          }
+          .header-refresh-btn span {
+            display: none;
+          }
+          .header-refresh-btn {
+            padding: 6px 8px;
+          }
+          .role-dropdown {
+            font-size: 11px;
+            padding: 6px 8px 6px 0;
+          }
+          .role-select-container {
+            padding: 0 4px;
+          }
         }
       `}</style>
     </header>
