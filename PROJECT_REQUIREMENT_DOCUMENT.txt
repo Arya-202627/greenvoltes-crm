@@ -1,0 +1,476 @@
+PROJECT REQUIREMENT DOCUMENT  
+Custom Solar EPC CRM & ERP Platform for Greenvolt Energy Solutions LLP  
+Project Overview  
+We are a solar EPC company engaged in rooftop solar installations under PM Surya 
+Ghar Yojana and MNRE subsidy programs. We require a web -based CRM and ERP 
+platform that can manage the complete business workflow from lead generation to 
+subsidy processing, l oan management, installation, inventory, accounts, and after -
+sales service.  
+The platform should support multiple user roles including Admin, Dealer, 
+Employees, Installation Teams, Loan Executives, MNRE Executives, and 
+Customers.  
+The system should be scalable to support future expansion across Kerala and 
+India.  
+ 
+MODULE 1: LEAD & CUSTOMER MANAGEMENT  
+Features:  
+Customer Database Management  
+Fields:  
+• Customer Name  
+• Age  
+• Gender  
+• Mobile Number  
+• Alternate Number  
+• Email ID  
+• Installation Address  
+• District  
+• State  
+• Pincode  
+Lead Source Tracking:  
+• Facebook  
+
+--- Page Break ---
+
+• Website  
+• Dealer  
+• Referral  
+• Walking Customer  
+• Google Ads  
+• WhatsApp Campaign  
+Lead Status Workflow:  
+• New Lead  
+• Contacted  
+• Site Visit Scheduled  
+• Site Survey Completed  
+• Quotation Sent  
+• Negotiation  
+• Order Confirmed  
+• Installation Pending  
+• Installed  
+• Subsidy Pending  
+• Completed  
+Document Storage:  
+• Aadhaar  
+• PAN Card  
+• Electricity Bill  
+• Geotagged Photos  
+• Property Tax Receipt  
+• Land Tax Receipt  
+• Bank Passbook  
+• Customer Signature  
+• Other Supporting Documents  
+
+--- Page Break ---
+
+Requirements:  
+• Search Customers  
+• Filter Customers  
+• Lead Conversion Reports  
+• Customer Activity Timeline  
+ 
+MODULE 2: DEALER PORTAL  
+Each dealer should receive separate login credentials.  
+Dealer Functions:  
+Create Customer:  
+Fields:  
+• Customer Name  
+• Age  
+• Gender  
+• Phone Number  
+• Email ID  
+• Installation Address  
+• Roof Type  
+• Project Size  
+• Inverter Brand  
+• Panel Brand  
+• Loan Required (Yes/No)  
+• Loan Amount  
+Co-Applicant Details (if age above 65 years):  
+• Name  
+• Mobile Number  
+• Relationship  
+Dealer Capabilities:  
+
+--- Page Break ---
+
+• Upload Customer Documents  
+• Request Quotation  
+• Confirm Orders  
+• Track Project Progress  
+• View Commission  
+• View Payment Status  
+• Download Documents  
+Admin Functions:  
+• Approve Dealers  
+• Block Dealers  
+• Assign Territory  
+• Monitor Dealer Performance  
+• Dealer Sales Reports  
+ 
+MODULE 3: SITE SURVEY MANAGEMENT  
+Survey Information:  
+• Roof Type  
+• Roof Area  
+• GPS Coordinates  
+• Shadow Analysis  
+• Existing Electrical Load  
+• Sanctioned Load  
+• Phase Type (Single/Three Phase)  
+• Site Survey Photos  
+• Site Engineer Remarks  
+Generate:  
+• Survey Report PDF  
+• Recommended Plant Capacity  
+
+--- Page Break ---
+
+• Estimated Energy Generation  
+• Preliminary BOM  
+ 
+MODULE 4: QUOTATION MANAGEMENT  
+Generate:  
+• Quotation  
+• Proforma Invoice  
+• Tax Invoice  
+Features:  
+• Product Library  
+• Pricing Templates  
+• GST Calculation  
+• PDF Generation  
+• Digital Signature  
+• Approval Workflow  
+Quotation Version Control  
+ 
+MODULE 5: PROJECT MANAGEMENT  
+Project Stages:  
+1. Lead  
+2. Site Survey  
+3. Design  
+4. Quotation  
+5. Order Confirmation  
+6. Material Procurement  
+7. Installation  
+8. KSEB Application  
+9. Net Meter Approval  
+
+--- Page Break ---
+
+10. Inspection  
+11. Commissioning  
+12. Subsidy Application  
+13. Subsidy Received  
+14. Project Completed  
+Dashboard Should Show:  
+• Delayed Projects  
+• Upcoming Installations  
+• Pending Approvals  
+• Project Completion Rate  
+ 
+MODULE 6: MNRE & PM SURYA GHAR MANAGEMENT  
+Store:  
+• Consumer ID  
+• Vendor ID  
+• Application ID  
+• Registration Number  
+Track:  
+• Registration Status  
+• Document Verification  
+• Inspection Status  
+• Subsidy Status  
+Automated Alerts:  
+• Missing Documents  
+• Inspection Due  
+• Subsidy Pending  
+• Application Rejected  
+Document Storage:  
+
+--- Page Break ---
+
+• Commissioning Report  
+• Vendor Declaration  
+• Installation Photos  
+• Inspection Documents  
+ 
+MODULE 7: LOAN PROCESSING MODULE  
+Customer Loan Tracking  
+Fields:  
+• Bank/NBFC  
+• Loan Amount  
+• Interest Rate  
+• EMI Amount  
+Stages:  
+• Applied  
+• Under Review  
+• Approved  
+• Sanctioned  
+• Disbursed  
+Store:  
+• Sanction Letter  
+• EMI Schedule  
+• Customer Agreements  
+Reports:  
+• Pending Loans  
+• Approved Loans  
+• Disbursed Loans  
+ 
+MODULE 8: INVENTORY & STOCK MANAGEMENT  
+
+--- Page Break ---
+
+Track Inventory:  
+• Solar Panels  
+• Inverters  
+• Structure Materials  
+• ACDB  
+• DCDB  
+• Earthing Kits  
+• SPD  
+• Cables  
+• Connectors  
+• BOS Materials  
+Functions:  
+• Stock In  
+• Stock Out  
+• Warehouse Management  
+• Serial Number Tracking  
+• Low Stock Alerts  
+• Reorder Planning  
+Multiple Warehouse Support  
+ 
+MODULE 9: PURCHASE MANAGEMENT  
+Features:  
+Purchase Request  
+Purchase Order  
+Goods Receipt Note (GRN)  
+Track:  
+• Supplier  
+• Material Cost  
+• Quantity  
+
+--- Page Break ---
+
+• Delivery Status  
+Supplier Database:  
+• GST Number  
+• Contact Details  
+• Payment Terms  
+ 
+MODULE 10: INSTALLATION MANAGEMENT  
+Assign Teams:  
+• Civil Team  
+• Fabrication Team  
+• Electrical Team  
+Daily Updates:  
+• Work Progress  
+• Installation Photos  
+• Materials Used  
+• Completion Percentage  
+GPS-Based Attendance for Teams  
+Geo-tagged Completion Photos  
+ 
+MODULE 11: EMPLOYEE MANAGEMENT  
+Manage:  
+• Staff Records  
+• Attendance  
+• Leave Management  
+• Payroll Integration  
+• Task Assignment  
+Roles:  
+• Admin  
+
+--- Page Break ---
+
+• Sales Manager  
+• Sales Executive  
+• Dealer  
+• Site Survey Engineer  
+• Design Engineer  
+• Procurement Manager  
+• Store Manager  
+• MNRE Executive  
+• Loan Executive  
+• Installation Manager  
+• Installation Team  
+• Accounts Executive  
+• Service Engineer  
+ 
+MODULE 12: FINANCE & ACCOUNTING  
+Integration:  
+• Zoho Books API  
+Track:  
+• Customer Payments  
+• Supplier Payments  
+• GST  
+• Receivables  
+• Payables  
+Project Profitability Calculation  
+Example:  
+Project Value = ₹2,00,000  
+Panel Cost = ₹95,340  
+BOS Cost = ₹20,000  
+
+--- Page Break ---
+
+Fabrication Cost = ₹12,000  
+Labour Cost = ₹12,000  
+CRM should automatically calculate:  
+• Gross Profit  
+• Profit Percentage  
+• Net Margin  
+Financial Dashboard:  
+• Revenue  
+• Monthly Sales  
+• Outstanding Payments  
+• GST Liability  
+ 
+MODULE 13: SERVICE & WARRANTY MANAGEMENT  
+Track:  
+• 5-Year Maintenance  
+• Panel Warranty  
+• Inverter Warranty  
+Generate:  
+• Service Tickets  
+• AMC Schedules  
+• Maintenance Reminders  
+Customer Complaint Management  
+ 
+MODULE 14: CUSTOMER PORTAL  
+Customer Login  
+Customer Can:  
+• View Project Status  
+• Track Subsidy Status  
+
+--- Page Break ---
+
+• Download Invoices  
+• Download Warranty Certificates  
+• Download Service Reports  
+• Raise Service Requests  
+ 
+MODULE 15: DOCUMENT MANAGEMENT SYSTEM  
+Centralized Document Repository  
+Categories:  
+Customer Documents  
+Project Documents  
+MNRE Documents  
+Loan Documents  
+Supplier Documents  
+Features:  
+• OCR Search  
+• Version Control  
+• Document Expiry Alerts  
+• Download History  
+ 
+MODULE 16: NOTIFICATION SYSTEM  
+Notifications Through:  
+• WhatsApp  
+• SMS  
+• Email  
+• In-App Notifications  
+Examples:  
+• Site Visit Reminder  
+• Loan Approval  
+• Material Arrival  
+
+--- Page Break ---
+
+• Subsidy Approval  
+• Warranty Expiry  
+ 
+MODULE 17: WORKFLOW AUTOMATION  
+Examples:  
+Order Confirmed:  
+• Create Project  
+• Assign Site Engineer  
+• Create Procurement Request  
+Installation Completed:  
+• Create MNRE Task  
+• Generate Commissioning Documents  
+Subsidy Received:  
+• Mark Project Completed  
+ 
+MODULE 18: VENDOR & SUPPLIER MANAGEMENT  
+Track:  
+• Panel Suppliers  
+• Inverter Suppliers  
+• BOS Suppliers  
+Store:  
+• Contact Information  
+• Price Lists  
+• GST Details  
+Monitor:  
+• Delivery Performance  
+• Supplier Ratings  
+ 
+
+--- Page Break ---
+
+MODULE 19: QUALITY CONTROL  
+Checklist Before Completion:  
+• Earthing Verified  
+• ACDB Installed  
+• DCDB Installed  
+• SPD Installed  
+• Structure Inspection Completed  
+• Generation Test Passed  
+Generate:  
+• Quality Inspection Report  
+• QC Certificate  
+ 
+MODULE 20: MANAGEMENT DASHBOARD  
+CEO Dashboard  
+Display:  
+• Total Leads  
+• Active Projects  
+• Monthly Sales  
+• Revenue  
+• Gross Profit  
+• Net Profit  
+• Stock Value  
+• Dealer Performance  
+• Pending Subsidy Amount  
+• Pending Loan Amount  
+• Project Completion Rate  
+• Installation Performance  
+• Employee Performance  
+
+--- Page Break ---
+
+Dashboard should support:  
+• Graphs  
+• Filters  
+• Export to Excel/PDF  
+ 
+TECHNICAL REQUIREMENTS  
+Frontend:  
+• React.js / Next.js  
+Mobile App:  
+• Flutter  
+Backend:  
+• Node.js (NestJS preferred)  
+Database:  
+• PostgreSQL  
+File Storage:  
+• AWS S3  
+Authentication:  
+• JWT + OTP Login  
+Integrations:  
+• Zoho Books  
+• WhatsApp API  
+• SMS Gateway  
+• Email Service  
+Deployment:  
+• AWS Cloud  
+Scalability Requirement:  
+• 10,000+ Customers  
+• 1,000+ Dealers  
+
+--- Page Break ---
+
+• Multi-Warehouse  
+• Multi-Branch  
+• Multi-State Expansion  
+The system should be modular so future features such as AI quotation generation, 
+AI subsidy eligibility checks, AI loan eligibility checks, and mobile applications can 
+be added without major redesign.  
+ 
