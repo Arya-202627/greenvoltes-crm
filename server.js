@@ -72,6 +72,10 @@ function hashPassword(password, salt) {
 
 // Initialize SQLite database
 const dbPath = process.env.DATABASE_FILE || join(__dirname, 'database.sqlite');
+const dbDir = dirname(dbPath);
+if (!fs.existsSync(dbDir)) {
+  fs.mkdirSync(dbDir, { recursive: true });
+}
 const db = new sqlite3.Database(dbPath, (err) => {
   if (err) {
     console.error('Failed to connect to SQLite database:', err);
