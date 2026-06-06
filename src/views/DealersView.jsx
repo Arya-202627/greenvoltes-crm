@@ -7,7 +7,7 @@ import {
   Plus, UploadCloud, ChevronRight, Check, Ban
 } from 'lucide-react';
 
-export default function DealersView({ userRole }) {
+export default function DealersView({ userRole, currentUser }) {
   const [db, setDb] = useState(getDb());
   const [activeTab, setActiveTab] = useState(userRole === 'Dealer' ? 'dashboard' : 'dealers-list');
   const [isAddCustomerOpen, setIsAddCustomerOpen] = useState(false);
@@ -31,7 +31,12 @@ export default function DealersView({ userRole }) {
   }, [userRole]);
 
   // Find Dealer profile if logged in as dealer
-  const myDealer = db.dealers[0]; // Let's simulate D001 for the Dealer view
+  const myDealer = db.dealers.find(d => 
+    d.email === currentUser?.email || 
+    d.id === currentUser?.dealerId || 
+    d.contactPerson?.toLowerCase() === currentUser?.name?.toLowerCase() || 
+    d.email === currentUser?.id
+  ) || db.dealers[0];
 
   const refreshDb = () => {
     setDb(getDb());

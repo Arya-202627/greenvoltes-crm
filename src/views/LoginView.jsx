@@ -12,16 +12,15 @@ export default function LoginView({ onLoginSuccess }) {
 
   const demoUsers = [
     { email: 'admin@greenvoltes.in', pass: 'admin123', role: 'Admin' },
-    { email: 'dealer@greenvoltes.in', pass: 'dealer123', role: 'Dealer' },
+    { email: 'ruksana', pass: 'ruksana', role: 'Dealer (Ruksana)' },
+    { email: 'yadu', pass: 'yadu', role: 'Dealer (Yadu)' },
+    { email: 'vyshak', pass: 'vyshak', role: 'Dealer (Vyshak)' },
+    { email: 'rinku', pass: 'rinku', role: 'Dealer (Rinku)' },
+    { email: 'aswin', pass: 'aswin', role: 'Dealer (Aswin)' },
     { email: 'customer@greenvoltes.in', pass: 'customer123', role: 'Customer' },
     { email: 'anoop@greenvoltes.in', pass: 'sales123', role: 'Sales Manager' },
     { email: 'manu@greenvoltes.in', pass: 'survey123', role: 'Site Survey Engineer' },
-    { email: 'devan@greenvoltes.in', pass: 'design123', role: 'Design Engineer' },
-    { email: 'preetha@greenvoltes.in', pass: 'mnre123', role: 'MNRE Executive' },
-    { email: 'vimal@greenvoltes.in', pass: 'loan123', role: 'Loan Executive' },
-    { email: 'rahul@greenvoltes.in', pass: 'accounts123', role: 'Accounts Executive' },
-    { email: 'gokul@greenvoltes.in', pass: 'service123', role: 'Service Engineer' },
-    { email: 'amal@greenvoltes.in', pass: 'install123', role: 'Installation Team' }
+    { email: 'devan@greenvoltes.in', pass: 'design123', role: 'Design Engineer' }
   ];
 
   const handleLogin = async (e) => {
@@ -67,13 +66,13 @@ export default function LoginView({ onLoginSuccess }) {
           )}
 
           <div className="login-input-group">
-            <label>Business Email Address</label>
+            <label>Email or Username</label>
             <div className="input-box">
               <Mail size={16} className="input-icon" />
               <input 
-                type="email" 
+                type="text" 
                 required 
-                placeholder="name@greenvoltes.in"
+                placeholder="Email or Username"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={loading}

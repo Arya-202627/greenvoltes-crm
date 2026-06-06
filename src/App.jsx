@@ -161,7 +161,7 @@ function App() {
       case 'leads':
         return <LeadsView />;
       case 'dealer':
-        return <DealersView userRole={userRole} />;
+        return <DealersView userRole={userRole} currentUser={currentUser} />;
       case 'surveys':
         return <SurveysView userRole={userRole} />;
       case 'quotes':
