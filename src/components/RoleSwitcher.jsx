@@ -176,6 +176,25 @@ export default function RoleSwitcher({ userRole, setUserRole, onRoleChange, curr
           .time-display {
             display: none;
           }
+          .sys-status-text {
+            display: none;
+          }
+          .profile-name {
+            display: none;
+          }
+          .header-refresh-btn span {
+            display: none;
+          }
+          .header-refresh-btn {
+            padding: 6px 8px;
+          }
+          .role-dropdown {
+            font-size: 11px;
+            padding: 6px 8px 6px 0;
+          }
+          .role-select-container {
+            padding: 0 4px;
+          }
         }
 
         .time-sep {
