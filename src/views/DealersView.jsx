@@ -1,10 +1,10 @@
 // DealersView.jsx
-import React, { useState, useEffect } from 'react';
-import { getDb, saveDb, logNotification } from '../db/mockDb';
+import React, { useState, useEffect, useRef } from 'react';
+import { getDb, saveDb, logNotification, uploadFileToServer, getUploadUrl } from '../db/mockDb';
 import Modal from '../components/Modal';
 import { 
   Users, Handshake, ShieldCheck, BadgePercent, BadgeIndianRupee,
-  Plus, UploadCloud, ChevronRight, Check, Ban
+  Plus, UploadCloud, ChevronRight, Check, Ban, CheckCircle2
 } from 'lucide-react';
 
 export default function DealersView({ userRole, currentUser }) {
@@ -12,6 +12,136 @@ export default function DealersView({ userRole, currentUser }) {
   const [activeTab, setActiveTab] = useState(userRole === 'Dealer' ? 'dashboard' : 'dealers-list');
   const [isAddCustomerOpen, setIsAddCustomerOpen] = useState(false);
   const [selectedDealer, setSelectedDealer] = useState(null);
+  const [selectedLeadForDocs, setSelectedLeadForDocs] = useState(null);
+  const canvasRef = useRef(null);
+  const [isDrawing, setIsDrawing] = useState(false);
+
+  // Canvas drawing handlers
+  const startDrawing = (e) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    ctx.strokeStyle = '#10b981';
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+    const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+    
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    setIsDrawing(true);
+  };
+
+  const draw = (e) => {
+    if (!isDrawing) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+    const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+    
+    ctx.lineTo(x, y);
+    ctx.stroke();
+  };
+
+  const stopDrawing = () => {
+    setIsDrawing(false);
+  };
+
+  const clearSignature = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  };
+
+  const saveSignature = async () => {
+    const canvas = canvasRef.current;
+    if (!canvas || !selectedLeadForDocs) return;
+    
+    const blank = document.createElement('canvas');
+    blank.width = canvas.width;
+    blank.height = canvas.height;
+    if (canvas.toDataURL() === blank.toDataURL()) {
+      alert('Please draw a signature first.');
+      return;
+    }
+    
+    const dataUrl = canvas.toDataURL('image/png');
+    
+    try {
+      const blob = await fetch(dataUrl).then(res => res.blob());
+      const file = new File([blob], `sig-${selectedLeadForDocs.id}.png`, { type: 'image/png' });
+      const uploadedData = await uploadFileToServer(file);
+      
+      const updatedDb = { ...db };
+      const leadIdx = updatedDb.leads.findIndex(l => l.id === selectedLeadForDocs.id);
+      if (leadIdx !== -1) {
+        updatedDb.leads[leadIdx].documents = {
+          ...updatedDb.leads[leadIdx].documents,
+          signature: {
+            name: uploadedData.name,
+            uploaded: true,
+            originalName: uploadedData.originalName,
+            url: uploadedData.url
+          }
+        };
+        saveDb(updatedDb);
+        setDb(updatedDb);
+        setSelectedLeadForDocs(updatedDb.leads[leadIdx]);
+        alert('Signature saved successfully!');
+      }
+    } catch (err) {
+      console.error('Failed to save signature:', err);
+      alert('Failed to save signature.');
+    }
+  };
+
+  const handleDealerFileUpload = async (docKey) => {
+    if (!selectedLeadForDocs) return;
+    
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx';
+    
+    input.onchange = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      try {
+        const uploadedData = await uploadFileToServer(file);
+        
+        const updatedDb = { ...db };
+        const leadIdx = updatedDb.leads.findIndex(l => l.id === selectedLeadForDocs.id);
+        if (leadIdx !== -1) {
+          updatedDb.leads[leadIdx].documents = {
+            ...updatedDb.leads[leadIdx].documents,
+            [docKey]: {
+              name: uploadedData.name,
+              uploaded: true,
+              originalName: uploadedData.originalName,
+              url: uploadedData.url
+            }
+          };
+          saveDb(updatedDb);
+          setDb(updatedDb);
+          setSelectedLeadForDocs(updatedDb.leads[leadIdx]);
+          alert(`Successfully uploaded ${file.name}!`);
+        }
+      } catch (err) {
+        console.error('File upload failed:', err);
+        alert('File upload failed. Please try again.');
+      }
+    };
+    input.click();
+  };
 
   // New customer registration fields
   const [newCust, setNewCust] = useState({
@@ -221,9 +351,14 @@ export default function DealersView({ userRole, currentUser }) {
                         </div>
                       </td>
                       <td>
-                        <button className="btn btn-secondary btn-sm" onClick={() => alert(`Showing quote details for ${lead.name}`)}>
-                          View Quote
-                        </button>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <button className="btn btn-secondary btn-sm" onClick={() => alert(`Showing quote details for ${lead.name}`)}>
+                            View Quote
+                          </button>
+                          <button className="btn btn-primary btn-sm" onClick={() => setSelectedLeadForDocs(lead)}>
+                            DMS Files
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -519,7 +654,7 @@ export default function DealersView({ userRole, currentUser }) {
                   <option value="Adani Topcon">Adani Topcon</option>
                 </optgroup>
                 <optgroup label="Bifacial">
-                  <option value="APS Topcon 550">APS Topcon 550</option>
+                  <option value="APS Bifacial 550">APS Bifacial 550</option>
                   <option value="Waaree Bifacial 540">Waaree Bifacial 540</option>
                   <option value="Adani Bifacial 550">Adani Bifacial 550</option>
                 </optgroup>
@@ -562,6 +697,167 @@ export default function DealersView({ userRole, currentUser }) {
             </button>
           </div>
         </form>
+      </Modal>
+
+      {/* Dealer DMS Files Upload Modal */}
+      <Modal 
+        isOpen={!!selectedLeadForDocs} 
+        onClose={() => setSelectedLeadForDocs(null)} 
+        title={`KYC & Site Files: ${selectedLeadForDocs?.name}`}
+      >
+        <div style={{ padding: '8px 0' }}>
+          <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '16px' }}>
+            Upload customer KYC documents and site inspection details for reference:
+          </p>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
+            {selectedLeadForDocs && Object.keys(selectedLeadForDocs.documents).map(key => {
+              if (key === 'signature') return null;
+              
+              const doc = selectedLeadForDocs.documents[key];
+              const label = key.toUpperCase()
+                .replace('GEOTAGGEDPHOTOS', 'GEOTAG PHOTOS')
+                .replace('ELECTRICITYBILL', 'KSEB BILL')
+                .replace('PROPERTYTAX', 'PROPERTY TAX')
+                .replace('LANDTAX', 'LAND TAX')
+                .replace('BANKPASSBOOK', 'BANK PASSBOOK');
+
+              return (
+                <div key={key} style={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center', 
+                  padding: '10px 14px', 
+                  background: 'rgba(255,255,255,0.02)', 
+                  border: '1px solid var(--border-color)', 
+                  borderRadius: '6px' 
+                }}>
+                  <span style={{ fontSize: '13px', fontWeight: '500' }}>{label}</span>
+                  
+                  {doc?.uploaded ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span 
+                        style={{ 
+                          fontSize: '12px', 
+                          color: 'var(--primary)', 
+                          cursor: 'pointer', 
+                          textDecoration: 'underline',
+                          fontWeight: '600'
+                        }}
+                        onClick={() => window.open(getUploadUrl(doc.name), '_blank')}
+                      >
+                        <Check size={14} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'middle' }} />
+                        {doc.name.substring(0, 12)}...
+                      </span>
+                      <button 
+                        className="btn btn-secondary btn-sm"
+                        onClick={() => handleDealerFileUpload(key)}
+                        style={{ padding: '4px 8px', fontSize: '11px' }}
+                      >
+                        Replace
+                      </button>
+                    </div>
+                  ) : (
+                    <button 
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => handleDealerFileUpload(key)}
+                      style={{ padding: '4px 10px', fontSize: '12px' }}
+                    >
+                      <UploadCloud size={12} style={{ marginRight: '6px' }} /> Upload
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Digital Signature Canvas inside Modal */}
+          {selectedLeadForDocs && (
+            <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '16px', marginTop: '16px' }}>
+              <h4 style={{ fontSize: '14px', color: 'var(--text-primary)', marginBottom: '8px' }}>Customer Consent Signature</h4>
+              {selectedLeadForDocs.documents.signature?.uploaded ? (
+                <div style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '8px', 
+                  color: 'var(--primary)', 
+                  fontWeight: '600', 
+                  fontSize: '13px',
+                  background: 'rgba(16, 185, 129, 0.05)',
+                  padding: '10px 14px',
+                  borderRadius: '6px',
+                  border: '1px solid rgba(16, 185, 129, 0.2)'
+                }}>
+                  <CheckCircle2 size={16} /> Signature captured and locked in DMS.
+                  <span 
+                    style={{ 
+                      marginLeft: 'auto', 
+                      textDecoration: 'underline', 
+                      cursor: 'pointer',
+                      fontSize: '12px'
+                    }}
+                    onClick={() => window.open(getUploadUrl(selectedLeadForDocs.documents.signature.name), '_blank')}
+                  >
+                    View Signature
+                  </span>
+                </div>
+              ) : (
+                <div>
+                  <p style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '8px' }}>
+                    Draw on the pad below to capture customer digital consent:
+                  </p>
+                  <div style={{ position: 'relative', background: '#080b11', borderRadius: '6px', border: '1px solid var(--border-color)', overflow: 'hidden' }}>
+                    <canvas 
+                      ref={canvasRef} 
+                      width={440} 
+                      height={150}
+                      style={{ display: 'block', cursor: 'crosshair', width: '100%' }}
+                      onMouseDown={startDrawing}
+                      onMouseMove={draw}
+                      onMouseUp={stopDrawing}
+                      onMouseLeave={stopDrawing}
+                      onTouchStart={startDrawing}
+                      onTouchMove={draw}
+                      onTouchEnd={stopDrawing}
+                    />
+                    <button 
+                      type="button"
+                      onClick={clearSignature}
+                      style={{ 
+                        position: 'absolute', 
+                        bottom: '8px', 
+                        right: '8px', 
+                        background: 'rgba(255,255,255,0.05)', 
+                        border: '1px solid var(--border-color)', 
+                        color: 'var(--text-secondary)',
+                        padding: '2px 8px',
+                        borderRadius: '4px',
+                        fontSize: '10px',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Clear
+                    </button>
+                  </div>
+                  <button 
+                    type="button" 
+                    className="btn btn-primary btn-sm" 
+                    style={{ marginTop: '10px' }} 
+                    onClick={saveSignature}
+                  >
+                    Save Customer Signature
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '24px' }}>
+            <button className="btn btn-secondary" onClick={() => setSelectedLeadForDocs(null)}>
+              Close DMS Panel
+            </button>
+          </div>
+        </div>
       </Modal>
     </div>
   );
