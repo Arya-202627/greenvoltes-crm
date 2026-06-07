@@ -16,8 +16,8 @@ export default function DealersView({ userRole, currentUser }) {
   // New customer registration fields
   const [newCust, setNewCust] = useState({
     name: '', age: '', gender: 'Male', phone: '', email: '', address: '',
-    roofType: 'Concrete Flat Roof', projectSize: 3, inverterBrand: 'APS',
-    panelBrand: 'APS', loanRequired: 'No', loanAmount: '',
+    roofType: 'Concrete Flat Roof', projectSize: 3, inverterBrand: 'APS (Recommended)',
+    panelBrand: 'APS Topcon 600 (Recommended)', loanRequired: 'No', loanAmount: '',
     coApplicantName: '', coApplicantPhone: '', coApplicantRelation: ''
   });
 
@@ -103,8 +103,8 @@ export default function DealersView({ userRole, currentUser }) {
     setIsAddCustomerOpen(false);
     setNewCust({
       name: '', age: '', gender: 'Male', phone: '', email: '', address: '',
-      roofType: 'Concrete Flat Roof', projectSize: 3, inverterBrand: 'APS',
-      panelBrand: 'APS', loanRequired: 'No', loanAmount: '',
+      roofType: 'Concrete Flat Roof', projectSize: 3, inverterBrand: 'APS (Recommended)',
+      panelBrand: 'APS Topcon 600 (Recommended)', loanRequired: 'No', loanAmount: '',
       coApplicantName: '', coApplicantPhone: '', coApplicantRelation: ''
     });
     refreshDb();
@@ -471,14 +471,39 @@ export default function DealersView({ userRole, currentUser }) {
 
           <div className="form-row">
             <div className="form-group">
-              <label>Preferred Inverter Brand</label>
+              <label>Preferred Inverter Type</label>
               <select 
                 className="form-control"
                 value={newCust.inverterBrand}
                 onChange={(e) => setNewCust({ ...newCust, inverterBrand: e.target.value })}
               >
-                <option value="APS">APS (Recommended)</option>
-                <option value="Deye">Deye</option>
+                <optgroup label="Ongrid - G TIE">
+                  <option value="APS (Recommended)">APS (Recommended)</option>
+                  <option value="Deye (G TIE)">Deye</option>
+                  <option value="Solaire (G TIE)">Solaire</option>
+                  <option value="Foxess">Foxess</option>
+                  <option value="Eastman (G TIE)">Eastman</option>
+                  <option value="Solar Edge with Optimizer">Solar Edge with Optimizer</option>
+                </optgroup>
+                <optgroup label="Ongrid - Micro Inverter">
+                  <option value="Hoymiles Micro inverter">Hoymiles Micro inverter</option>
+                  <option value="T-sun Micro inverter">T-sun Micro inverter</option>
+                  <option value="Deye Micro Inverter">Deye Micro Inverter</option>
+                  <option value="Jio Spark Micro Inverter">Jio Spark Micro Inverter</option>
+                  <option value="Enphase Micro Inverter (Premium)">Enphase Micro Inverter (Premium)</option>
+                </optgroup>
+                <optgroup label="Hybrid">
+                  <option value="Deye (Hybrid)">Deye</option>
+                  <option value="Solaire (Hybrid)">Solaire</option>
+                  <option value="Eastman (Hybrid)">Eastman</option>
+                </optgroup>
+                <optgroup label="Offgrid">
+                  <option value="Ashapower">Ashapower</option>
+                  <option value="Microtek">Microtek</option>
+                  <option value="UTL Solar">UTL Solar</option>
+                  <option value="Luminous Solar">Luminous Solar</option>
+                  <option value="Eastman (Offgrid)">Eastman</option>
+                </optgroup>
               </select>
             </div>
             <div className="form-group">
@@ -488,9 +513,16 @@ export default function DealersView({ userRole, currentUser }) {
                 value={newCust.panelBrand}
                 onChange={(e) => setNewCust({ ...newCust, panelBrand: e.target.value })}
               >
-                <option value="APS">APS (Recommended)</option>
-                <option value="Waaree Solar">Waaree Solar</option>
-                <option value="Adani">Adani</option>
+                <optgroup label="Topcon">
+                  <option value="APS Topcon 600 (Recommended)">APS Topcon 600 (Recommended)</option>
+                  <option value="Waaree Topcon">Waaree Topcon</option>
+                  <option value="Adani Topcon">Adani Topcon</option>
+                </optgroup>
+                <optgroup label="Bifacial">
+                  <option value="APS Topcon 550">APS Topcon 550</option>
+                  <option value="Waaree Bifacial 540">Waaree Bifacial 540</option>
+                  <option value="Adani Bifacial 550">Adani Bifacial 550</option>
+                </optgroup>
               </select>
             </div>
           </div>
