@@ -4,6 +4,7 @@ import { User, ShieldAlert, ShieldCheck, Cpu, RefreshCw, Menu } from 'lucide-rea
 export default function RoleSwitcher({ userRole, setUserRole, onRoleChange, currentUser, onLogout, toggleSidebar }) {
   const roles = [
     'Admin',
+    'Office Staff',
     'Dealer',
     'Customer',
     'Sales Manager',

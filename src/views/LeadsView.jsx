@@ -1,7 +1,7 @@
 // LeadsView.jsx
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
-  getLeads, saveLead, deleteLead, logNotification, uploadFileToServer, getUploadUrl, getDb
+  getLeads, saveLead, deleteLead, logNotification, uploadFileToServer, getUploadUrl, getDb, saveDb
 } from '../db/mockDb';
 import { PDFDocument, rgb } from 'pdf-lib';
 import Modal from '../components/Modal';
@@ -45,11 +45,12 @@ const getSignatureImage = async (lead) => {
   }
 };
 
-export default function LeadsView() {
+export default function LeadsView({ userRole, currentUser }) {
   const [leads, setLeads] = useState(getLeads());
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [districtFilter, setDistrictFilter] = useState('All');
+  const [dealerFilter, setDealerFilter] = useState('All');
   
   // Modals state
   const [isNewLeadOpen, setIsNewLeadOpen] = useState(false);
@@ -62,9 +63,26 @@ export default function LeadsView() {
     pincode: '', source: 'Website', status: 'New Lead', notes: ''
   });
 
-  // Signature Canvas Ref
-  const canvasRef = useRef(null);
-  const [isDrawing, setIsDrawing] = useState(false);
+  const db = getDb();
+  const dealers = db.dealers || [];
+
+  // Find Dealer profile if logged in as dealer
+  const myDealer = dealers.find(d => 
+    d.email === currentUser?.email || 
+    d.id === currentUser?.dealerId || 
+    d.contactPerson?.toLowerCase() === currentUser?.name?.toLowerCase() || 
+    d.email === currentUser?.id
+  );
+
+  const getDealerName = (lead) => {
+    if (lead.dealerId) {
+      const dealer = dealers.find(d => d.id === lead.dealerId);
+      return dealer ? (dealer.contactPerson || dealer.name) : `Dealer (${lead.dealerId})`;
+    }
+    return lead.source || 'Direct';
+  };
+
+
 
   const districts = [
     'Thiruvananthapuram', 'Kollam', 'Pathanamthitta', 'Alappuzha', 
@@ -84,7 +102,8 @@ export default function LeadsView() {
 
   const handleCreateLead = (e) => {
     e.preventDefault();
-    const leadId = 'L' + (leads.length + 101);
+    const rawLeads = getLeads();
+    const leadId = 'L' + (rawLeads.length + 101);
     const leadData = {
       ...newLead,
       id: leadId,
@@ -100,6 +119,24 @@ export default function LeadsView() {
         signature: { name: '', uploaded: false }
       }
     };
+
+    if (userRole === 'Dealer' && myDealer) {
+      leadData.source = 'Dealer';
+      leadData.dealerId = myDealer.id;
+      leadData.district = myDealer.district;
+      leadData.state = myDealer.state;
+      leadData.notes = `Registered by dealer ${myDealer.name}. ${newLead.notes || ''}`;
+
+      // Update dealer sales count and commission
+      const fullDb = getDb();
+      const dIdx = fullDb.dealers.findIndex(d => d.id === myDealer.id);
+      if (dIdx !== -1) {
+        fullDb.dealers[dIdx].salesCount += 1;
+        fullDb.dealers[dIdx].earnings += 15000;
+        saveDb(fullDb);
+      }
+    }
+
     saveLead(leadData);
     logNotification({
       recipient: `${leadData.name} (${leadData.mobile})`,
@@ -164,61 +201,7 @@ export default function LeadsView() {
     input.click();
   };
 
-  // Canvas signature helpers
-  const startDrawing = (e) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    const rect = canvas.getBoundingClientRect();
-    const x = (e.clientX || e.touches[0].clientX) - rect.left;
-    const y = (e.clientY || e.touches[0].clientY) - rect.top;
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    setIsDrawing(true);
-  };
 
-  const draw = (e) => {
-    if (!isDrawing) return;
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    const rect = canvas.getBoundingClientRect();
-    const x = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
-    const y = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
-    ctx.lineTo(x, y);
-    ctx.strokeStyle = '#fff';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-  };
-
-  const stopDrawing = () => {
-    setIsDrawing(false);
-  };
-
-  const clearSignature = () => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-  };
-
-  const saveSignature = () => {
-    if (!activeLead) return;
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const dataUrl = canvas.toDataURL('image/png');
-    const updatedLead = {
-      ...activeLead,
-      documents: {
-        ...activeLead.documents,
-        signature: { name: 'customer_signed_canvas.png', uploaded: true, dataUrl: dataUrl }
-      }
-    };
-    saveLead(updatedLead);
-    setActiveLead(updatedLead);
-    refreshLeads();
-    alert('Customer digital signature saved to DMS successfully!');
-  };
 
   const generateVendorFeasibility = async (lead) => {
     if (!lead) return;
@@ -497,12 +480,23 @@ export default function LeadsView() {
 
   // Filter Leads
   const filteredLeads = leads.filter(lead => {
+    // Role-based visibility isolation:
+    if (userRole === 'Dealer' && myDealer) {
+      if (lead.dealerId !== myDealer.id) return false;
+    }
+
     const matchesSearch = lead.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           lead.mobile.includes(searchTerm) || 
                           lead.id.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'All' || lead.status === statusFilter;
     const matchesDistrict = districtFilter === 'All' || lead.district === districtFilter;
-    return matchesSearch && matchesStatus && matchesDistrict;
+    
+    // Dealer/Source filter for Admin/Office Staff
+    const matchesDealer = dealerFilter === 'All' || 
+                          (dealerFilter === 'Direct' && !lead.dealerId) || 
+                          lead.dealerId === dealerFilter;
+                          
+    return matchesSearch && matchesStatus && matchesDistrict && matchesDealer;
   });
 
   return (
@@ -530,6 +524,15 @@ export default function LeadsView() {
           />
         </div>
         <div className="filter-group">
+          {userRole !== 'Dealer' && (
+            <select value={dealerFilter} onChange={(e) => setDealerFilter(e.target.value)} className="filter-dropdown">
+              <option value="All">All Dealers / Sources</option>
+              <option value="Direct">Direct (No Dealer)</option>
+              {dealers.map(d => (
+                <option key={d.id} value={d.id}>{d.contactPerson || d.name}</option>
+              ))}
+            </select>
+          )}
           <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="filter-dropdown">
             <option value="All">All Statuses</option>
             {leadStatuses.map(s => <option key={s} value={s}>{s}</option>)}
@@ -550,6 +553,7 @@ export default function LeadsView() {
                 <tr>
                   <th>Lead ID</th>
                   <th>Customer Name</th>
+                  {userRole !== 'Dealer' && <th>Dealer / Source</th>}
                   <th>Contact</th>
                   <th>District</th>
                   <th>Status</th>
@@ -565,6 +569,7 @@ export default function LeadsView() {
                   >
                     <td><code>{lead.id}</code></td>
                     <td style={{ fontWeight: '600' }}>{lead.name}</td>
+                    {userRole !== 'Dealer' && <td>{getDealerName(lead)}</td>}
                     <td>{lead.mobile}</td>
                     <td>{lead.district}</td>
                     <td>
@@ -608,7 +613,7 @@ export default function LeadsView() {
                 <p><Phone size={12} /> {activeLead.mobile} {activeLead.alternateMobile && `/ ${activeLead.alternateMobile}`}</p>
                 <p><Mail size={12} /> {activeLead.email || 'No Email Added'}</p>
                 <p><MapPin size={12} /> {activeLead.address}, {activeLead.district}, {activeLead.pincode}</p>
-                <p><strong>Age:</strong> {activeLead.age} yrs | <strong>Gender:</strong> {activeLead.gender} | <strong>Source:</strong> {activeLead.source}</p>
+                <p><strong>Age:</strong> {activeLead.age} yrs | <strong>Gender:</strong> {activeLead.gender} | <strong>Source:</strong> {activeLead.source} {activeLead.dealerId && `(${getDealerName(activeLead)})`}</p>
               </div>
 
               {/* Status Update Flow */}
@@ -633,7 +638,15 @@ export default function LeadsView() {
                     const doc = activeLead.documents[key];
                     return (
                       <div key={key} className="dms-row">
-                        <span className="doc-label">{key.toUpperCase().replace('GEOTAGGEDPHOTOS', 'GEOTAG PHOTOS').replace('ELECTRICITYBILL', 'KSEB BILL')}</span>
+                        <span className="doc-label">
+                          {key.toUpperCase()
+                            .replace('GEOTAGGEDPHOTOS', 'GEOTAG PHOTOS')
+                            .replace('ELECTRICITYBILL', 'KSEB BILL')
+                            .replace('PROPERTYTAX', 'PROPERTY TAX')
+                            .replace('LANDTAX', 'LAND TAX')
+                            .replace('BANKPASSBOOK', 'BANK PASSBOOK')
+                            .replace('SIGNATURE', 'CUSTOMER SIGNATURE')}
+                        </span>
                         {doc.uploaded ? (
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                              <span 
@@ -664,37 +677,7 @@ export default function LeadsView() {
                 </div>
               </div>
 
-              {/* Digital Signature Pad */}
-              <div className="detail-section">
-                <h4>Customer Consent Signature</h4>
-                {activeLead.documents.signature.uploaded ? (
-                  <div className="sig-approved">
-                    <CheckCircle2 size={16} /> Signature captured and locked in DMS.
-                  </div>
-                ) : (
-                  <div>
-                    <p style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '8px' }}>Draw on the black pad below to capture customer digital approval:</p>
-                    <div className="signature-pad-container">
-                      <canvas 
-                        ref={canvasRef} 
-                        width={300} 
-                        height={150}
-                        onMouseDown={startDrawing}
-                        onMouseMove={draw}
-                        onMouseUp={stopDrawing}
-                        onMouseLeave={stopDrawing}
-                        onTouchStart={startDrawing}
-                        onTouchMove={draw}
-                        onTouchEnd={stopDrawing}
-                      />
-                      <button className="signature-pad-clear" onClick={clearSignature}>Clear</button>
-                    </div>
-                    <button className="btn btn-primary btn-sm" style={{ marginTop: '8px' }} onClick={saveSignature}>
-                      Save Signature
-                    </button>
-                  </div>
-                )}
-              </div>
+
 
               {/* Document Generation */}
               <div className="detail-section">

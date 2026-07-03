@@ -24,7 +24,8 @@ export default function LoginView({ onLoginSuccess }) {
     { email: 'customer@greenvoltes.in', pass: 'customer123', role: 'Customer' },
     { email: 'anoop@greenvoltes.in', pass: 'sales123', role: 'Sales Manager' },
     { email: 'manu@greenvoltes.in', pass: 'survey123', role: 'Site Survey Engineer' },
-    { email: 'devan@greenvoltes.in', pass: 'design123', role: 'Design Engineer' }
+    { email: 'devan@greenvoltes.in', pass: 'design123', role: 'Design Engineer' },
+    { email: 'staff', pass: 'staff123', role: 'Office Staff' }
   ];
 
   const handleLogin = async (e) => {

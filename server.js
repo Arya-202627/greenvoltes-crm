@@ -193,7 +193,8 @@ const defaultData = {
     { id: 'vimal@greenvoltes.in', email: 'vimal@greenvoltes.in', name: 'Vimal Kumar', role: 'Loan Executive', passwordHash: hashPassword('loan123', defaultSalt), salt: defaultSalt },
     { id: 'rahul@greenvoltes.in', email: 'rahul@greenvoltes.in', name: 'Rahul R.', role: 'Accounts Executive', passwordHash: hashPassword('accounts123', defaultSalt), salt: defaultSalt },
     { id: 'gokul@greenvoltes.in', email: 'gokul@greenvoltes.in', name: 'Gokul Krishna', role: 'Service Engineer', passwordHash: hashPassword('service123', defaultSalt), salt: defaultSalt },
-    { id: 'amal@greenvoltes.in', email: 'amal@greenvoltes.in', name: 'Amal Dev', role: 'Installation Team', passwordHash: hashPassword('install123', defaultSalt), salt: defaultSalt }
+    { id: 'amal@greenvoltes.in', email: 'amal@greenvoltes.in', name: 'Amal Dev', role: 'Installation Team', passwordHash: hashPassword('install123', defaultSalt), salt: defaultSalt },
+    { id: 'staff', email: 'staff', name: 'Office Staff', role: 'Office Staff', passwordHash: hashPassword('staff123', defaultSalt), salt: defaultSalt }
   ],
 
   leads: [

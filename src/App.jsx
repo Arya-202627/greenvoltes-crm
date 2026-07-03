@@ -46,7 +46,8 @@ function App() {
       // Default views mapping for roles
       const defaultViews = {
         Admin: 'ceo',
-        Dealer: 'dealer',
+        Dealer: 'leads',
+        'Office Staff': 'leads',
         Customer: 'customer_portal',
         'Sales Manager': 'ceo',
         'Sales Executive': 'leads',
@@ -93,7 +94,7 @@ function App() {
   // Map of views to check role authorization
   const viewPermissions = {
     ceo: ['Admin', 'Sales Manager'],
-    leads: ['Admin', 'Sales Manager', 'Sales Executive'],
+    leads: ['Admin', 'Sales Manager', 'Sales Executive', 'Office Staff', 'Dealer'],
     dealer: ['Admin', 'Dealer'],
     surveys: ['Admin', 'Site Survey Engineer'],
     quotes: ['Admin', 'Sales Manager', 'Sales Executive'],
@@ -114,7 +115,8 @@ function App() {
   // Default redirect views for each role
   const defaultViews = {
     Admin: 'ceo',
-    Dealer: 'dealer',
+    Dealer: 'leads',
+    'Office Staff': 'leads',
     Customer: 'customer_portal',
     'Sales Manager': 'ceo',
     'Sales Executive': 'leads',
@@ -159,7 +161,7 @@ function App() {
       case 'ceo':
         return <CEOView />;
       case 'leads':
-        return <LeadsView />;
+        return <LeadsView userRole={userRole} currentUser={currentUser} />;
       case 'dealer':
         return <DealersView userRole={userRole} currentUser={currentUser} />;
       case 'surveys':
