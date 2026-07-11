@@ -299,21 +299,30 @@ export default function LeadsView({ userRole, currentUser }) {
         color: rgb(1, 1, 1),
       });
 
-      // RTS Applied coordinates: X=304, Y=312, W=100, H=14
+      // RTS Applied coordinates: X=304, Y=307, W=100, H=18
       firstPage.drawRectangle({
         x: 304,
-        y: 312,
+        y: 307,
         width: 100,
-        height: 14,
+        height: 18,
         color: rgb(1, 1, 1),
       });
 
-      // RTS Installed coordinates: X=304, Y=282, W=100, H=14
+      // RTS Installed coordinates: X=304, Y=277, W=100, H=18
       firstPage.drawRectangle({
         x: 304,
-        y: 282,
+        y: 277,
         width: 100,
-        height: 14,
+        height: 18,
+        color: rgb(1, 1, 1),
+      });
+
+      // Cover stray pre-printed 2,25,000/- at Point 17: X=304, Y=224, W=150, H=16
+      firstPage.drawRectangle({
+        x: 304,
+        y: 224,
+        width: 150,
+        height: 16,
         color: rgb(1, 1, 1),
       });
 
