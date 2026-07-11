@@ -438,6 +438,9 @@ export default function LeadsView({ userRole, currentUser }) {
             let maxLuminance = 0;
             
             for (let i = 0; i < data.length; i += 4) {
+              const a = data[i+3];
+              if (a < 50) continue; // Skip transparent pixels
+              
               const r = data[i];
               const g = data[i+1];
               const b = data[i+2];
@@ -462,11 +465,12 @@ export default function LeadsView({ userRole, currentUser }) {
                 const r = data[i];
                 const g = data[i+1];
                 const b = data[i+2];
+                const a = data[i+3];
                 const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
                 
-                // If pixel is background paper/whitespace (luminance > threshold), make it transparent
-                if (luminance > threshold) {
-                  data[i+3] = 0; // Alpha channel = 0
+                // If pixel is transparent or light background paper, treat as background
+                if (a < 50 || luminance > threshold) {
+                  data[i+3] = 0; // Make transparent
                 } else {
                   // Sharpen contrast for darker ink pixels
                   data[i] = Math.max(0, r - 40);
