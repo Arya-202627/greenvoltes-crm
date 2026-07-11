@@ -994,6 +994,17 @@ export default function LeadsView({ userRole, currentUser }) {
                 <h4>Feasibility Details</h4>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '12px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ fontWeight: '500', minWidth: '130px' }}>Discom Consumer ID:</span>
+                    <input 
+                      type="text" 
+                      className="form-control" 
+                      style={{ flex: 1, padding: '3px 6px', fontSize: '12px', height: 'auto' }}
+                      value={activeLead.consumerNumber || ''} 
+                      placeholder="e.g. 1155141031583"
+                      onChange={(e) => handleUpdateCustomField('consumerNumber', e.target.value)}
+                    />
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <span style={{ fontWeight: '500', minWidth: '130px' }}>Jan Samarth ID:</span>
                     <span style={{ color: 'var(--text-secondary)' }}>ANS-SOLAR-</span>
                     <input 
