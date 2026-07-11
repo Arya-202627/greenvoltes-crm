@@ -299,21 +299,30 @@ export default function LeadsView({ userRole, currentUser }) {
         color: rgb(1, 1, 1),
       });
 
-      // RTS Applied coordinates: X=304, Y=302, W=100, H=14
+      // RTS Applied coordinates: X=304, Y=312, W=100, H=14
       firstPage.drawRectangle({
         x: 304,
-        y: 302,
+        y: 312,
         width: 100,
         height: 14,
         color: rgb(1, 1, 1),
       });
 
-      // RTS Installed coordinates: X=304, Y=272, W=100, H=14
+      // RTS Installed coordinates: X=304, Y=282, W=100, H=14
       firstPage.drawRectangle({
         x: 304,
-        y: 272,
+        y: 282,
         width: 100,
         height: 14,
+        color: rgb(1, 1, 1),
+      });
+
+      // Project Cost coordinates: X=304, Y=210, W=150, H=16
+      firstPage.drawRectangle({
+        x: 304,
+        y: 210,
+        width: 150,
+        height: 16,
         color: rgb(1, 1, 1),
       });
 
@@ -372,6 +381,7 @@ export default function LeadsView({ userRole, currentUser }) {
 
       const appliedCapacity = formatCapacity(lead.appliedCapacity);
       const installedCapacity = formatCapacity(lead.installedCapacity);
+      const projectCostVal = lead.projectCost !== undefined ? lead.projectCost : '2,25,000/-';
 
       firstPage.drawText(janSamarthId, {
         x: 306,
@@ -383,7 +393,7 @@ export default function LeadsView({ userRole, currentUser }) {
 
       firstPage.drawText(appliedCapacity, {
         x: 306,
-        y: 305,
+        y: 315,
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
@@ -391,7 +401,15 @@ export default function LeadsView({ userRole, currentUser }) {
 
       firstPage.drawText(installedCapacity, {
         x: 306,
-        y: 275,
+        y: 285,
+        size: 10,
+        font: helveticaFont,
+        color: rgb(0, 0, 0),
+      });
+
+      firstPage.drawText(projectCostVal, {
+        x: 306,
+        y: 215,
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
@@ -998,6 +1016,17 @@ export default function LeadsView({ userRole, currentUser }) {
                       value={activeLead.installedCapacity !== undefined ? activeLead.installedCapacity : '3'} 
                       placeholder="e.g. 3"
                       onChange={(e) => handleUpdateCustomField('installedCapacity', e.target.value)}
+                    />
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ fontWeight: '500', minWidth: '130px' }}>Project Cost (Rs.):</span>
+                    <input 
+                      type="text" 
+                      className="form-control" 
+                      style={{ flex: 1, padding: '3px 6px', fontSize: '12px', height: 'auto' }}
+                      value={activeLead.projectCost !== undefined ? activeLead.projectCost : '2,25,000/-'} 
+                      placeholder="e.g. 2,25,000/-"
+                      onChange={(e) => handleUpdateCustomField('projectCost', e.target.value)}
                     />
                   </div>
                 </div>
