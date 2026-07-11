@@ -433,7 +433,24 @@ export default function LeadsView({ userRole, currentUser }) {
             const width = canvas.width;
             const height = canvas.height;
             
-            // Track bounding box of ink pixels to crop empty margins
+            // First pass: find min and max luminance to calculate a dynamic threshold
+            let minLuminance = 255;
+            let maxLuminance = 0;
+            
+            for (let i = 0; i < data.length; i += 4) {
+              const r = data[i];
+              const g = data[i+1];
+              const b = data[i+2];
+              const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
+              
+              if (luminance < minLuminance) minLuminance = luminance;
+              if (luminance > maxLuminance) maxLuminance = luminance;
+            }
+            
+            // Set dynamic threshold at 65% of contrast range
+            const threshold = minLuminance + (maxLuminance - minLuminance) * 0.65;
+            
+            // Second pass: isolate ink pixels and track signature bounding box bounds
             let minX = width;
             let minY = height;
             let maxX = 0;
@@ -447,14 +464,14 @@ export default function LeadsView({ userRole, currentUser }) {
                 const b = data[i+2];
                 const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
                 
-                // If pixel is background paper/whitespace (luminance > 175), make it transparent
-                if (luminance > 175) {
+                // If pixel is background paper/whitespace (luminance > threshold), make it transparent
+                if (luminance > threshold) {
                   data[i+3] = 0; // Alpha channel = 0
                 } else {
                   // Sharpen contrast for darker ink pixels
-                  data[i] = Math.max(0, r - 35);
-                  data[i+1] = Math.max(0, g - 35);
-                  data[i+2] = Math.max(0, b - 35);
+                  data[i] = Math.max(0, r - 40);
+                  data[i+1] = Math.max(0, g - 40);
+                  data[i+2] = Math.max(0, b - 40);
                   
                   // Expand bounding box to fit the signature strokes
                   if (x < minX) minX = x;
