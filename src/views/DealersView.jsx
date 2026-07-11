@@ -9,7 +9,7 @@ import {
 
 export default function DealersView({ userRole, currentUser }) {
   const [db, setDb] = useState(getDb());
-  const [activeTab, setActiveTab] = useState(userRole === 'Dealer' ? 'dashboard' : 'dealers-list');
+  const [activeTab, setActiveTab] = useState(userRole === 'Employee' ? 'dashboard' : 'employees-list');
   const [isAddCustomerOpen, setIsAddCustomerOpen] = useState(false);
   const [selectedDealer, setSelectedDealer] = useState(null);
   const [selectedLeadForDocs, setSelectedLeadForDocs] = useState(null);
@@ -64,10 +64,10 @@ export default function DealersView({ userRole, currentUser }) {
 
   useEffect(() => {
     setDb(getDb());
-    if (userRole === 'Dealer') {
+    if (userRole === 'Employee') {
       setActiveTab('dashboard');
     } else {
-      setActiveTab('dealers-list');
+      setActiveTab('employees-list');
     }
   }, [userRole]);
 
@@ -168,10 +168,10 @@ export default function DealersView({ userRole, currentUser }) {
     <div className="dealers-view">
       <div className="view-header-row">
         <div>
-          <h2 className="view-title"><Handshake className="view-icon-color" /> Dealer Management</h2>
-          <p className="view-subtitle">Monitor Greenvoltes franchise partners, register customers, check commission accounts, and assign zones.</p>
+          <h2 className="view-title"><Handshake className="view-icon-color" /> Employee Portal</h2>
+          <p className="view-subtitle">Monitor Greenvoltes employee/franchise partner submissions, register customers, and check commission/payout accounts.</p>
         </div>
-        {userRole === 'Dealer' && (
+        {userRole === 'Employee' && (
           <button className="btn btn-primary" onClick={() => setIsAddCustomerOpen(true)}>
             <Plus size={16} /> Register Customer
           </button>
@@ -180,17 +180,17 @@ export default function DealersView({ userRole, currentUser }) {
 
       {userRole === 'Admin' ? (
         <div className="tab-container">
-          <button className={`tab-btn ${activeTab === 'dealers-list' ? 'active' : ''}`} onClick={() => setActiveTab('dealers-list')}>
-            Dealer Directory
+          <button className={`tab-btn ${activeTab === 'employees-list' ? 'active' : ''}`} onClick={() => setActiveTab('employees-list')}>
+            Employee Directory
           </button>
           <button className={`tab-btn ${activeTab === 'perform' ? 'active' : ''}`} onClick={() => setActiveTab('perform')}>
-            Commission Oversight
+            Performance Oversight
           </button>
         </div>
       ) : null}
 
-      {/* ---------------- DEALER SPECIFIC VIEW ---------------- */}
-      {userRole === 'Dealer' && (
+      {/* ---------------- EMPLOYEE SPECIFIC VIEW ---------------- */}
+      {userRole === 'Employee' && (
         <div className="dealer-dashboard-layout">
           {/* Dealer Stats */}
           <div className="grid-cols-4" style={{ marginBottom: '20px' }}>
@@ -286,21 +286,21 @@ export default function DealersView({ userRole, currentUser }) {
       )}
 
       {/* ---------------- ADMIN SPECIFIC VIEW ---------------- */}
-      {userRole === 'Admin' && activeTab === 'dealers-list' && (
+      {userRole === 'Admin' && activeTab === 'employees-list' && (
         <div className="glass-card">
-          <h3 className="card-title" style={{ marginBottom: '16px' }}>Approved Solar Franchise Networks</h3>
+          <h3 className="card-title" style={{ marginBottom: '16px' }}>Approved Solar Employee & Franchise Directory</h3>
           <div className="table-responsive">
             <table className="custom-table">
               <thead>
                 <tr>
-                  <th>Dealer ID</th>
-                  <th>Agency Name</th>
+                  <th>Employee ID</th>
+                  <th>Employee/Agency Name</th>
                   <th>Contact Person</th>
                   <th>District</th>
                   <th>Assigned Territory</th>
                   <th>Total Leads</th>
                   <th>Status</th>
-                  <th>Manage Partner</th>
+                  <th>Manage Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -340,12 +340,12 @@ export default function DealersView({ userRole, currentUser }) {
 
       {userRole === 'Admin' && activeTab === 'perform' && (
         <div className="glass-card">
-          <h3 className="card-title" style={{ marginBottom: '16px' }}>Dealer Commission & Payout Registry</h3>
+          <h3 className="card-title" style={{ marginBottom: '16px' }}>Employee Commission & Payout Registry</h3>
           <div className="table-responsive">
             <table className="custom-table">
               <thead>
                 <tr>
-                  <th>Partner</th>
+                  <th>Employee / Agency</th>
                   <th>Bookings</th>
                   <th>Sales Volume (Simulated)</th>
                   <th>Total Commissions</th>
@@ -391,8 +391,8 @@ export default function DealersView({ userRole, currentUser }) {
         </div>
       )}
 
-      {/* Dealer Customer Registration Modal */}
-      <Modal isOpen={isAddCustomerOpen} onClose={() => setIsAddCustomerOpen(false)} title="Dealer Client Intake Form">
+      {/* Employee Customer Registration Modal */}
+      <Modal isOpen={isAddCustomerOpen} onClose={() => setIsAddCustomerOpen(false)} title="Employee Client Intake Form">
         <form onSubmit={handleRegisterCustomer} className="dealer-new-customer-form">
           <div className="form-row">
             <div className="form-group">

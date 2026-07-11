@@ -5,7 +5,7 @@ export default function RoleSwitcher({ userRole, setUserRole, onRoleChange, curr
   const roles = [
     'Admin',
     'Office Staff',
-    'Dealer',
+    'Employee',
     'Customer',
     'Sales Manager',
     'Site Survey Engineer',

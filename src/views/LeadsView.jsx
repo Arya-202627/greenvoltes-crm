@@ -66,18 +66,19 @@ export default function LeadsView({ userRole, currentUser }) {
   const db = getDb();
   const dealers = db.dealers || [];
 
-  // Find Dealer profile if logged in as dealer
-  const myDealer = dealers.find(d => 
+  // Find Employee profile if logged in as employee
+  const myEmployee = dealers.find(d => 
     d.email === currentUser?.email || 
     d.id === currentUser?.dealerId || 
+    d.id === currentUser?.employeeId || 
     d.contactPerson?.toLowerCase() === currentUser?.name?.toLowerCase() || 
     d.email === currentUser?.id
   );
 
-  const getDealerName = (lead) => {
+  const getEmployeeName = (lead) => {
     if (lead.dealerId) {
       const dealer = dealers.find(d => d.id === lead.dealerId);
-      return dealer ? (dealer.contactPerson || dealer.name) : `Dealer (${lead.dealerId})`;
+      return dealer ? (dealer.contactPerson || dealer.name) : `Employee (${lead.dealerId})`;
     }
     return lead.source || 'Direct';
   };
@@ -120,16 +121,16 @@ export default function LeadsView({ userRole, currentUser }) {
       }
     };
 
-    if (userRole === 'Dealer' && myDealer) {
-      leadData.source = 'Dealer';
-      leadData.dealerId = myDealer.id;
-      leadData.district = myDealer.district;
-      leadData.state = myDealer.state;
-      leadData.notes = `Registered by dealer ${myDealer.name}. ${newLead.notes || ''}`;
+    if (userRole === 'Employee' && myEmployee) {
+      leadData.source = 'Employee';
+      leadData.dealerId = myEmployee.id;
+      leadData.district = myEmployee.district;
+      leadData.state = myEmployee.state;
+      leadData.notes = `Registered by employee ${myEmployee.name}. ${newLead.notes || ''}`;
 
-      // Update dealer sales count and commission
+      // Update employee sales count and commission
       const fullDb = getDb();
-      const dIdx = fullDb.dealers.findIndex(d => d.id === myDealer.id);
+      const dIdx = fullDb.dealers.findIndex(d => d.id === myEmployee.id);
       if (dIdx !== -1) {
         fullDb.dealers[dIdx].salesCount += 1;
         fullDb.dealers[dIdx].earnings += 15000;
@@ -481,8 +482,8 @@ export default function LeadsView({ userRole, currentUser }) {
   // Filter Leads
   const filteredLeads = leads.filter(lead => {
     // Role-based visibility isolation:
-    if (userRole === 'Dealer' && myDealer) {
-      if (lead.dealerId !== myDealer.id) return false;
+    if (userRole === 'Employee' && myEmployee) {
+      if (lead.dealerId !== myEmployee.id) return false;
     }
 
     const matchesSearch = lead.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -491,7 +492,7 @@ export default function LeadsView({ userRole, currentUser }) {
     const matchesStatus = statusFilter === 'All' || lead.status === statusFilter;
     const matchesDistrict = districtFilter === 'All' || lead.district === districtFilter;
     
-    // Dealer/Source filter for Admin/Office Staff
+    // Employee/Source filter for Admin/Office Staff
     const matchesDealer = dealerFilter === 'All' || 
                           (dealerFilter === 'Direct' && !lead.dealerId) || 
                           lead.dealerId === dealerFilter;
@@ -524,10 +525,10 @@ export default function LeadsView({ userRole, currentUser }) {
           />
         </div>
         <div className="filter-group">
-          {userRole !== 'Dealer' && (
+          {userRole !== 'Employee' && (
             <select value={dealerFilter} onChange={(e) => setDealerFilter(e.target.value)} className="filter-dropdown">
-              <option value="All">All Dealers / Sources</option>
-              <option value="Direct">Direct (No Dealer)</option>
+              <option value="All">All Employees / Sources</option>
+              <option value="Direct">Direct (No Employee)</option>
               {dealers.map(d => (
                 <option key={d.id} value={d.id}>{d.contactPerson || d.name}</option>
               ))}
@@ -553,7 +554,7 @@ export default function LeadsView({ userRole, currentUser }) {
                 <tr>
                   <th>Lead ID</th>
                   <th>Customer Name</th>
-                  {userRole !== 'Dealer' && <th>Dealer / Source</th>}
+                  {userRole !== 'Employee' && <th>Employee / Source</th>}
                   <th>Contact</th>
                   <th>District</th>
                   <th>Status</th>
@@ -569,7 +570,7 @@ export default function LeadsView({ userRole, currentUser }) {
                   >
                     <td><code>{lead.id}</code></td>
                     <td style={{ fontWeight: '600' }}>{lead.name}</td>
-                    {userRole !== 'Dealer' && <td>{getDealerName(lead)}</td>}
+                    {userRole !== 'Employee' && <td>{getEmployeeName(lead)}</td>}
                     <td>{lead.mobile}</td>
                     <td>{lead.district}</td>
                     <td>
@@ -613,7 +614,7 @@ export default function LeadsView({ userRole, currentUser }) {
                 <p><Phone size={12} /> {activeLead.mobile} {activeLead.alternateMobile && `/ ${activeLead.alternateMobile}`}</p>
                 <p><Mail size={12} /> {activeLead.email || 'No Email Added'}</p>
                 <p><MapPin size={12} /> {activeLead.address}, {activeLead.district}, {activeLead.pincode}</p>
-                <p><strong>Age:</strong> {activeLead.age} yrs | <strong>Gender:</strong> {activeLead.gender} | <strong>Source:</strong> {activeLead.source} {activeLead.dealerId && `(${getDealerName(activeLead)})`}</p>
+                <p><strong>Age:</strong> {activeLead.age} yrs | <strong>Gender:</strong> {activeLead.gender} | <strong>Source:</strong> {activeLead.source} {activeLead.dealerId && `(${getEmployeeName(activeLead)})`}</p>
               </div>
 
               {/* Status Update Flow */}
