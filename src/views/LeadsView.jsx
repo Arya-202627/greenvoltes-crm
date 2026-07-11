@@ -66,13 +66,12 @@ export default function LeadsView({ userRole, currentUser }) {
   const db = getDb();
   const dealers = db.dealers || [];
 
-  // Find Employee profile if logged in as employee
   const myEmployee = dealers.find(d => 
-    d.email === currentUser?.email || 
+    d.email?.toLowerCase() === currentUser?.email?.toLowerCase() || 
     d.id === currentUser?.dealerId || 
     d.id === currentUser?.employeeId || 
     d.contactPerson?.toLowerCase() === currentUser?.name?.toLowerCase() || 
-    d.email === currentUser?.id
+    d.email?.toLowerCase() === currentUser?.id?.toLowerCase()
   );
 
   const getEmployeeName = (lead) => {

@@ -71,12 +71,12 @@ export default function DealersView({ userRole, currentUser }) {
     }
   }, [userRole]);
 
-  // Find Dealer profile if logged in as dealer
   const myDealer = db.dealers.find(d => 
-    d.email === currentUser?.email || 
+    d.email?.toLowerCase() === currentUser?.email?.toLowerCase() || 
     d.id === currentUser?.dealerId || 
+    d.id === currentUser?.employeeId || 
     d.contactPerson?.toLowerCase() === currentUser?.name?.toLowerCase() || 
-    d.email === currentUser?.id
+    d.email?.toLowerCase() === currentUser?.id?.toLowerCase()
   ) || db.dealers[0];
 
   const refreshDb = () => {
