@@ -332,6 +332,7 @@ export default function LeadsView({ userRole, currentUser }) {
       const fourthPage = pages[3];
 
       const helveticaFont = await pdfDoc.embedFont('Helvetica');
+      const helveticaBoldFont = await pdfDoc.embedFont('Helvetica-Bold');
 
       // Date calculations
       const date = new Date();
@@ -349,68 +350,126 @@ export default function LeadsView({ userRole, currentUser }) {
       const yearStr = 'Six'; // Since the template has "Two Thousand Twenty", we write "Six" to make it "Two Thousand Twenty Six"
 
       // Write Date on Page 1
-      // Date line 1: dayStr at X=264, Y=615. monthStr at X=355, Y=615
+      // Date line 1: dayStr at X=272, Y=615. monthStr at X=362, Y=615
       firstPage.drawText(dayStr, {
-        x: 264,
+        x: 272,
         y: 615,
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
       });
       firstPage.drawText(monthStr, {
-        x: 355,
+        x: 362,
         y: 615,
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
       });
-      // Date line 2: yearStr at X=190, Y=598
+      // Date line 2: yearStr at X=190, Y=595
       firstPage.drawText(yearStr, {
         x: 190,
-        y: 598,
+        y: 595,
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
       });
 
-      // Write Customer Name at X=80, Y=539
-      firstPage.drawText(lead.name || '', {
+      // Write Customer Name at X=80, Y=536
+      firstPage.drawText((lead.name || '').toUpperCase(), {
         x: 80,
-        y: 539,
+        y: 536,
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
       });
 
       // Write Address on Page 1
-      // Line 1: X=285, Y=539 (e.g. Ramesh Bhavan, Vyttila,)
-      // Line 2: X=80, Y=522 (e.g. Kochi, Kerala - 682019)
-      const fullAddress = `${lead.address || ''}, ${lead.district || ''}`;
-      let addrLine1 = fullAddress;
-      let addrLine2 = `Kerala, Pin - ${lead.pincode || ''}`;
+      const cleanAddress = (lead.address || '').replace(/,\s*$/, '').trim();
+      const cleanDistrict = (lead.district || '').trim();
+      const pincode = (lead.pincode || '').trim();
 
-      if (fullAddress.length > 35) {
-        const splitIdx = fullAddress.lastIndexOf(',', 35);
+      let addrLine1 = '';
+      let addrLine2 = '';
+
+      if (cleanAddress.length <= 35) {
+        addrLine1 = cleanAddress;
+        addrLine2 = cleanDistrict ? `${cleanDistrict}, KERALA, PIN - ${pincode}` : `KERALA, PIN - ${pincode}`;
+      } else {
+        let splitIdx = cleanAddress.lastIndexOf(',', 35);
+        if (splitIdx === -1) {
+          splitIdx = cleanAddress.lastIndexOf(' ', 35);
+        }
         if (splitIdx !== -1) {
-          addrLine1 = fullAddress.substring(0, splitIdx + 1);
-          addrLine2 = `${fullAddress.substring(splitIdx + 1).trim()}, Kerala, Pin - ${lead.pincode || ''}`;
+          addrLine1 = cleanAddress.substring(0, splitIdx + 1).trim();
+          const remainder = cleanAddress.substring(splitIdx + 1).trim();
+          addrLine2 = cleanDistrict ? `${remainder}, ${cleanDistrict}, KERALA, PIN - ${pincode}` : `${remainder}, KERALA, PIN - ${pincode}`;
         } else {
-          addrLine1 = fullAddress.substring(0, 35);
-          addrLine2 = `${fullAddress.substring(35).trim()}, Kerala, Pin - ${lead.pincode || ''}`;
+          addrLine1 = cleanAddress.substring(0, 35).trim();
+          const remainder = cleanAddress.substring(35).trim();
+          addrLine2 = cleanDistrict ? `${remainder}, ${cleanDistrict}, KERALA, PIN - ${pincode}` : `${remainder}, KERALA, PIN - ${pincode}`;
         }
       }
 
-      firstPage.drawText(addrLine1, {
+      firstPage.drawText(addrLine1.toUpperCase(), {
         x: 285,
-        y: 539,
+        y: 536,
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
       });
-      firstPage.drawText(addrLine2, {
+      firstPage.drawText(addrLine2.toUpperCase(), {
         x: 80,
-        y: 522,
+        y: 519,
         size: 10,
+        font: helveticaFont,
+        color: rgb(0, 0, 0),
+      });
+
+      // Format and Print Customer Name and Address inside the Page 4 box
+      const cleanAddress4 = (lead.address || '').replace(/,\s*$/, '').trim();
+      const cleanDistrict4 = (lead.district || '').trim();
+      const pincode4 = (lead.pincode || '').trim();
+
+      let addr4Line1 = '';
+      let addr4Line2 = '';
+
+      if (cleanAddress4.length <= 35) {
+        addr4Line1 = cleanAddress4;
+        addr4Line2 = cleanDistrict4 ? `${cleanDistrict4}, KERALA, PIN - ${pincode4}` : `KERALA, PIN - ${pincode4}`;
+      } else {
+        let splitIdx = cleanAddress4.lastIndexOf(',', 35);
+        if (splitIdx === -1) {
+          splitIdx = cleanAddress4.lastIndexOf(' ', 35);
+        }
+        if (splitIdx !== -1) {
+          addr4Line1 = cleanAddress4.substring(0, splitIdx + 1).trim();
+          const remainder = cleanAddress4.substring(splitIdx + 1).trim();
+          addr4Line2 = cleanDistrict4 ? `${remainder}, ${cleanDistrict4}, PIN - ${pincode4}` : `${remainder}, PIN - ${pincode4}`;
+        } else {
+          addr4Line1 = cleanAddress4.substring(0, 35).trim();
+          const remainder = cleanAddress4.substring(35).trim();
+          addr4Line2 = cleanDistrict4 ? `${remainder}, ${cleanDistrict4}, PIN - ${pincode4}` : `${remainder}, PIN - ${pincode4}`;
+        }
+      }
+
+      fourthPage.drawText((lead.name || '').toUpperCase(), {
+        x: 85,
+        y: 334,
+        size: 9,
+        font: helveticaBoldFont,
+        color: rgb(0, 0, 0),
+      });
+      fourthPage.drawText(addr4Line1.toUpperCase(), {
+        x: 85,
+        y: 318,
+        size: 9,
+        font: helveticaFont,
+        color: rgb(0, 0, 0),
+      });
+      fourthPage.drawText(addr4Line2.toUpperCase(), {
+        x: 85,
+        y: 301,
+        size: 9,
         font: helveticaFont,
         color: rgb(0, 0, 0),
       });
@@ -434,6 +493,16 @@ export default function LeadsView({ userRole, currentUser }) {
               width: 80,
               height: 35,
             });
+
+            // Draw signature image on Page 1, 2, and 3 footers
+            for (let i = 0; i < 3; i++) {
+              pages[i].drawImage(pngImage, {
+                x: 60,
+                y: 92,
+                width: 65,
+                height: 22,
+              });
+            }
           } catch (e) {
             console.error('Failed to render signature in PDF:', e);
             fourthPage.drawText('(Signed Digitally)', {
