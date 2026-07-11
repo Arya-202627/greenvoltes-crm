@@ -317,21 +317,21 @@ export default function LeadsView({ userRole, currentUser }) {
         color: rgb(1, 1, 1),
       });
 
-      // Cover stray pre-printed 2,25,000/- at Point 17: X=304, Y=224, W=150, H=16
+      // Cover stray pre-printed 2,25,000/- at Point 17: X=304, Y=220, W=150, H=18
       firstPage.drawRectangle({
         x: 304,
-        y: 224,
+        y: 220,
         width: 150,
-        height: 16,
+        height: 18,
         color: rgb(1, 1, 1),
       });
 
-      // Project Cost coordinates: X=304, Y=210, W=150, H=16
+      // Project Cost coordinates: X=304, Y=170, W=150, H=18
       firstPage.drawRectangle({
         x: 304,
-        y: 210,
+        y: 170,
         width: 150,
-        height: 16,
+        height: 18,
         color: rgb(1, 1, 1),
       });
 
@@ -418,7 +418,7 @@ export default function LeadsView({ userRole, currentUser }) {
 
       firstPage.drawText(projectCostVal, {
         x: 306,
-        y: 215,
+        y: 175,
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
