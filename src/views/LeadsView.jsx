@@ -201,6 +201,29 @@ export default function LeadsView({ userRole, currentUser }) {
     input.click();
   };
 
+  const handleDeleteDocument = (docKey) => {
+    if (!activeLead) return;
+    if (confirm('Are you sure you want to delete this document?')) {
+      const updatedLead = {
+        ...activeLead,
+        documents: {
+          ...activeLead.documents,
+          [docKey]: { 
+            uploaded: false,
+            name: '',
+            originalName: '',
+            url: '',
+            uploadedAt: null,
+            dataUrl: ''
+          }
+        }
+      };
+      saveLead(updatedLead);
+      setActiveLead(updatedLead);
+      refreshLeads();
+    }
+  };
+
 
 
   const generateVendorFeasibility = async (lead) => {
@@ -844,6 +867,14 @@ export default function LeadsView({ userRole, currentUser }) {
                               style={{ border: 'none', padding: '2px', background: 'none' }}
                             >
                               <UploadCloud size={12} style={{ transform: 'rotate(180deg)', color: 'var(--primary)', cursor: 'pointer' }} />
+                            </button>
+                            <button 
+                              className="icon-btn btn-sm" 
+                              onClick={() => handleDeleteDocument(key)} 
+                              title="Delete document"
+                              style={{ border: 'none', padding: '2px', background: 'none' }}
+                            >
+                              <Trash2 size={12} style={{ color: '#ef4444', cursor: 'pointer' }} />
                             </button>
                           </div>
                         ) : (
