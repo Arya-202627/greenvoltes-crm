@@ -430,29 +430,62 @@ export default function LeadsView({ userRole, currentUser }) {
             
             const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             const data = imgData.data;
+            const width = canvas.width;
+            const height = canvas.height;
             
-            // Loop through pixels and make any light background pixel transparent
-            for (let i = 0; i < data.length; i += 4) {
-              const r = data[i];
-              const g = data[i+1];
-              const b = data[i+2];
-              
-              // Calculate luminance
-              const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
-              
-              // If pixel is close to white/grey background, make it transparent
-              if (luminance > 165) {
-                data[i+3] = 0; // Alpha channel = 0
-              } else {
-                // Sharpen contrast for darker ink pixels
-                data[i] = Math.max(0, r - 30);
-                data[i+1] = Math.max(0, g - 30);
-                data[i+2] = Math.max(0, b - 30);
+            // Track bounding box of ink pixels to crop empty margins
+            let minX = width;
+            let minY = height;
+            let maxX = 0;
+            let maxY = 0;
+            
+            for (let y = 0; y < height; y++) {
+              for (let x = 0; x < width; x++) {
+                const i = (y * width + x) * 4;
+                const r = data[i];
+                const g = data[i+1];
+                const b = data[i+2];
+                const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
+                
+                // If pixel is background paper/whitespace (luminance > 175), make it transparent
+                if (luminance > 175) {
+                  data[i+3] = 0; // Alpha channel = 0
+                } else {
+                  // Sharpen contrast for darker ink pixels
+                  data[i] = Math.max(0, r - 35);
+                  data[i+1] = Math.max(0, g - 35);
+                  data[i+2] = Math.max(0, b - 35);
+                  
+                  // Expand bounding box to fit the signature strokes
+                  if (x < minX) minX = x;
+                  if (y < minY) minY = y;
+                  if (x > maxX) maxX = x;
+                  if (y > maxY) maxY = y;
+                }
               }
             }
             
             ctx.putImageData(imgData, 0, 0);
-            resolve(canvas.toDataURL('image/png'));
+            
+            // If signature content was found, crop the empty borders
+            if (maxX > minX && maxY > minY) {
+              const padding = 6; // Add a small padding to prevent clipping edges
+              const cropX = Math.max(0, minX - padding);
+              const cropY = Math.max(0, minY - padding);
+              const cropW = Math.min(width - cropX, (maxX - minX) + padding * 2);
+              const cropH = Math.min(height - cropY, (maxY - minY) + padding * 2);
+              
+              const cropCanvas = document.createElement('canvas');
+              cropCanvas.width = cropW;
+              cropCanvas.height = cropH;
+              const cropCtx = cropCanvas.getContext('2d');
+              
+              // Draw the cropped region from original canvas to the cropped canvas
+              cropCtx.drawImage(canvas, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+              resolve(cropCanvas.toDataURL('image/png'));
+            } else {
+              resolve(canvas.toDataURL('image/png'));
+            }
           };
           img.onerror = () => {
             resolve(dataUrl);
