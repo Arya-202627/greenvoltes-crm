@@ -224,7 +224,16 @@ export default function LeadsView({ userRole, currentUser }) {
     }
   };
 
-
+  const handleUpdateCustomField = (key, value) => {
+    if (!activeLead) return;
+    const updatedLead = {
+      ...activeLead,
+      [key]: value
+    };
+    saveLead(updatedLead);
+    setActiveLead(updatedLead);
+    refreshLeads();
+  };
 
   const generateVendorFeasibility = async (lead) => {
     if (!lead) return;
@@ -281,6 +290,33 @@ export default function LeadsView({ userRole, currentUser }) {
         color: rgb(1, 1, 1),
       });
 
+      // Jan Samarth ID coordinates: X=304, Y=564, W=250, H=16
+      firstPage.drawRectangle({
+        x: 304,
+        y: 564,
+        width: 250,
+        height: 16,
+        color: rgb(1, 1, 1),
+      });
+
+      // RTS Applied coordinates: X=304, Y=302, W=100, H=14
+      firstPage.drawRectangle({
+        x: 304,
+        y: 302,
+        width: 100,
+        height: 14,
+        color: rgb(1, 1, 1),
+      });
+
+      // RTS Installed coordinates: X=304, Y=272, W=100, H=14
+      firstPage.drawRectangle({
+        x: 304,
+        y: 272,
+        width: 100,
+        height: 14,
+        color: rgb(1, 1, 1),
+      });
+
       // Embed Helvetica font
       const helveticaFont = await pdfDoc.embedFont('Helvetica');
 
@@ -320,6 +356,42 @@ export default function LeadsView({ userRole, currentUser }) {
       firstPage.drawText(lead.pincode || '', {
         x: 308,
         y: 468,
+        size: 10,
+        font: helveticaFont,
+        color: rgb(0, 0, 0),
+      });
+
+      const janSamarthId = lead.janSamarthSuffix ? `ANS-SOLAR-${lead.janSamarthSuffix.trim()}` : 'ANS-SOLAR-13044028-3667576';
+      
+      const formatCapacity = (val) => {
+        if (val === undefined || val === null || val === '') return '3kw';
+        const clean = val.toString().trim().toLowerCase();
+        if (clean.endsWith('kw')) return clean;
+        return clean + 'kw';
+      };
+
+      const appliedCapacity = formatCapacity(lead.appliedCapacity);
+      const installedCapacity = formatCapacity(lead.installedCapacity);
+
+      firstPage.drawText(janSamarthId, {
+        x: 306,
+        y: 569,
+        size: 10,
+        font: helveticaFont,
+        color: rgb(0, 0, 0),
+      });
+
+      firstPage.drawText(appliedCapacity, {
+        x: 306,
+        y: 305,
+        size: 10,
+        font: helveticaFont,
+        color: rgb(0, 0, 0),
+      });
+
+      firstPage.drawText(installedCapacity, {
+        x: 306,
+        y: 275,
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
@@ -889,6 +961,47 @@ export default function LeadsView({ userRole, currentUser }) {
               </div>
 
 
+
+              {/* Feasibility Settings */}
+              <div className="detail-section">
+                <h4>Feasibility Details</h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ fontWeight: '500', minWidth: '130px' }}>Jan Samarth ID:</span>
+                    <span style={{ color: 'var(--text-secondary)' }}>ANS-SOLAR-</span>
+                    <input 
+                      type="text" 
+                      className="form-control" 
+                      style={{ flex: 1, padding: '3px 6px', fontSize: '12px', height: 'auto' }}
+                      value={activeLead.janSamarthSuffix || ''} 
+                      placeholder="e.g. 13044028-3667576"
+                      onChange={(e) => handleUpdateCustomField('janSamarthSuffix', e.target.value)}
+                    />
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ fontWeight: '500', minWidth: '130px' }}>Applied Capacity (kW):</span>
+                    <input 
+                      type="text" 
+                      className="form-control" 
+                      style={{ flex: 1, padding: '3px 6px', fontSize: '12px', height: 'auto' }}
+                      value={activeLead.appliedCapacity !== undefined ? activeLead.appliedCapacity : '3'} 
+                      placeholder="e.g. 3"
+                      onChange={(e) => handleUpdateCustomField('appliedCapacity', e.target.value)}
+                    />
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ fontWeight: '500', minWidth: '130px' }}>Installed Capacity (kW):</span>
+                    <input 
+                      type="text" 
+                      className="form-control" 
+                      style={{ flex: 1, padding: '3px 6px', fontSize: '12px', height: 'auto' }}
+                      value={activeLead.installedCapacity !== undefined ? activeLead.installedCapacity : '3'} 
+                      placeholder="e.g. 3"
+                      onChange={(e) => handleUpdateCustomField('installedCapacity', e.target.value)}
+                    />
+                  </div>
+                </div>
+              </div>
 
               {/* Document Generation */}
               <div className="detail-section">
