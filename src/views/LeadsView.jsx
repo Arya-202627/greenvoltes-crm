@@ -355,7 +355,21 @@ export default function LeadsView({ userRole, currentUser }) {
         color: rgb(0, 0, 0),
       });
 
-      firstPage.drawText(lead.address || '', {
+      const cleanAddressFeasibility = (address) => {
+        if (!address) return '';
+        let clean = address.trim();
+        if (clean.length <= 42) return clean.toUpperCase();
+        let truncateIdx = clean.lastIndexOf(',', 42);
+        if (truncateIdx === -1) {
+          truncateIdx = clean.lastIndexOf(' ', 42);
+        }
+        if (truncateIdx !== -1) {
+          return clean.substring(0, truncateIdx).trim().toUpperCase();
+        }
+        return clean.substring(0, 42).trim().toUpperCase();
+      };
+
+      firstPage.drawText(cleanAddressFeasibility(lead.address), {
         x: 306,
         y: 544,
         size: 10,
