@@ -326,10 +326,10 @@ export default function LeadsView({ userRole, currentUser }) {
         color: rgb(1, 1, 1),
       });
 
-      // Project Cost coordinates: X=304, Y=170, W=150, H=18
+      // Project Cost coordinates: X=304, Y=160, W=150, H=18
       firstPage.drawRectangle({
         x: 304,
-        y: 170,
+        y: 160,
         width: 150,
         height: 18,
         color: rgb(1, 1, 1),
@@ -418,7 +418,7 @@ export default function LeadsView({ userRole, currentUser }) {
 
       firstPage.drawText(projectCostVal, {
         x: 306,
-        y: 175,
+        y: 165,
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
