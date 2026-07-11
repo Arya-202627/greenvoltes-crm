@@ -374,6 +374,48 @@ export default function LeadsView({ userRole, currentUser }) {
         color: rgb(0, 0, 0),
       });
 
+      // Helper function to wrap text by character count
+      const wrapText = (text, maxChars) => {
+        const words = text.split(' ');
+        const lines = [];
+        let currentLine = '';
+        
+        words.forEach(word => {
+          if ((currentLine + ' ' + word).trim().length <= maxChars) {
+            currentLine = (currentLine + ' ' + word).trim();
+          } else {
+            if (currentLine) lines.push(currentLine);
+            currentLine = word;
+          }
+        });
+        if (currentLine) lines.push(currentLine);
+        return lines;
+      };
+
+      // Helper function to generate deduplicated address lines
+      const getCleanAddressLines = (lead, maxChars) => {
+        const addressStr = (lead.address || '').trim();
+        const districtStr = (lead.district || '').trim();
+        const pincodeStr = (lead.pincode || '').trim();
+        
+        let unified = addressStr;
+        
+        if (districtStr && !addressStr.toLowerCase().includes(districtStr.toLowerCase())) {
+          unified += `, ${districtStr}`;
+        }
+        
+        if (!addressStr.toLowerCase().includes('kerala')) {
+          unified += `, KERALA`;
+        }
+        
+        if (pincodeStr && !addressStr.includes(pincodeStr)) {
+          unified += `, PIN - ${pincodeStr}`;
+        }
+        
+        unified = unified.replace(/,+/g, ',').replace(/,\s*,/g, ',').replace(/,\s*$/, '').trim();
+        return wrapText(unified, maxChars);
+      };
+
       // Write Customer Name at X=80, Y=536
       firstPage.drawText((lead.name || '').toUpperCase(), {
         x: 80,
@@ -384,31 +426,9 @@ export default function LeadsView({ userRole, currentUser }) {
       });
 
       // Write Address on Page 1
-      const cleanAddress = (lead.address || '').replace(/,\s*$/, '').trim();
-      const cleanDistrict = (lead.district || '').trim();
-      const pincode = (lead.pincode || '').trim();
-
-      let addrLine1 = '';
-      let addrLine2 = '';
-
-      if (cleanAddress.length <= 35) {
-        addrLine1 = cleanAddress;
-        addrLine2 = cleanDistrict ? `${cleanDistrict}, KERALA, PIN - ${pincode}` : `KERALA, PIN - ${pincode}`;
-      } else {
-        let splitIdx = cleanAddress.lastIndexOf(',', 35);
-        if (splitIdx === -1) {
-          splitIdx = cleanAddress.lastIndexOf(' ', 35);
-        }
-        if (splitIdx !== -1) {
-          addrLine1 = cleanAddress.substring(0, splitIdx + 1).trim();
-          const remainder = cleanAddress.substring(splitIdx + 1).trim();
-          addrLine2 = cleanDistrict ? `${remainder}, ${cleanDistrict}, KERALA, PIN - ${pincode}` : `${remainder}, KERALA, PIN - ${pincode}`;
-        } else {
-          addrLine1 = cleanAddress.substring(0, 35).trim();
-          const remainder = cleanAddress.substring(35).trim();
-          addrLine2 = cleanDistrict ? `${remainder}, ${cleanDistrict}, KERALA, PIN - ${pincode}` : `${remainder}, KERALA, PIN - ${pincode}`;
-        }
-      }
+      const addrLinesPage1 = getCleanAddressLines(lead, 35);
+      const addrLine1 = addrLinesPage1[0] || '';
+      const addrLine2 = addrLinesPage1.slice(1).join(' ') || '';
 
       firstPage.drawText(addrLine1.toUpperCase(), {
         x: 285,
@@ -426,31 +446,10 @@ export default function LeadsView({ userRole, currentUser }) {
       });
 
       // Format and Print Customer Name and Address inside the Page 4 box
-      const cleanAddress4 = (lead.address || '').replace(/,\s*$/, '').trim();
-      const cleanDistrict4 = (lead.district || '').trim();
-      const pincode4 = (lead.pincode || '').trim();
-
-      let addr4Line1 = '';
-      let addr4Line2 = '';
-
-      if (cleanAddress4.length <= 35) {
-        addr4Line1 = cleanAddress4;
-        addr4Line2 = cleanDistrict4 ? `${cleanDistrict4}, KERALA, PIN - ${pincode4}` : `KERALA, PIN - ${pincode4}`;
-      } else {
-        let splitIdx = cleanAddress4.lastIndexOf(',', 35);
-        if (splitIdx === -1) {
-          splitIdx = cleanAddress4.lastIndexOf(' ', 35);
-        }
-        if (splitIdx !== -1) {
-          addr4Line1 = cleanAddress4.substring(0, splitIdx + 1).trim();
-          const remainder = cleanAddress4.substring(splitIdx + 1).trim();
-          addr4Line2 = cleanDistrict4 ? `${remainder}, ${cleanDistrict4}, PIN - ${pincode4}` : `${remainder}, PIN - ${pincode4}`;
-        } else {
-          addr4Line1 = cleanAddress4.substring(0, 35).trim();
-          const remainder = cleanAddress4.substring(35).trim();
-          addr4Line2 = cleanDistrict4 ? `${remainder}, ${cleanDistrict4}, PIN - ${pincode4}` : `${remainder}, PIN - ${pincode4}`;
-        }
-      }
+      const addrLinesPage4 = getCleanAddressLines(lead, 38);
+      const addr4Line1 = addrLinesPage4[0] || '';
+      const addr4Line2 = addrLinesPage4[1] || '';
+      const addr4Line3 = addrLinesPage4[2] || '';
 
       fourthPage.drawText((lead.name || '').toUpperCase(), {
         x: 85,
@@ -459,20 +458,33 @@ export default function LeadsView({ userRole, currentUser }) {
         font: helveticaBoldFont,
         color: rgb(0, 0, 0),
       });
-      fourthPage.drawText(addr4Line1.toUpperCase(), {
-        x: 85,
-        y: 318,
-        size: 9,
-        font: helveticaFont,
-        color: rgb(0, 0, 0),
-      });
-      fourthPage.drawText(addr4Line2.toUpperCase(), {
-        x: 85,
-        y: 301,
-        size: 9,
-        font: helveticaFont,
-        color: rgb(0, 0, 0),
-      });
+      if (addr4Line1) {
+        fourthPage.drawText(addr4Line1.toUpperCase(), {
+          x: 85,
+          y: 318,
+          size: 9,
+          font: helveticaFont,
+          color: rgb(0, 0, 0),
+        });
+      }
+      if (addr4Line2) {
+        fourthPage.drawText(addr4Line2.toUpperCase(), {
+          x: 85,
+          y: 301,
+          size: 9,
+          font: helveticaFont,
+          color: rgb(0, 0, 0),
+        });
+      }
+      if (addr4Line3) {
+        fourthPage.drawText(addr4Line3.toUpperCase(), {
+          x: 85,
+          y: 285,
+          size: 9,
+          font: helveticaFont,
+          color: rgb(0, 0, 0),
+        });
+      }
 
       // Draw Customer Signature on Page 4 if uploaded
       if (lead.documents && lead.documents.signature && lead.documents.signature.uploaded) {
@@ -486,12 +498,12 @@ export default function LeadsView({ userRole, currentUser }) {
             const signatureBytes = Uint8Array.from(atob(signatureBase64), c => c.charCodeAt(0));
             const pngImage = await pdfDoc.embedPng(signatureBytes);
 
-            // Draw signature image above "Please Sign Above" (X=85, Y=392, W=80, H=35)
+            // Draw signature image above "Please Sign Above" (X=85, Y=382, W=80, H=30)
             fourthPage.drawImage(pngImage, {
               x: 85,
-              y: 392,
+              y: 382,
               width: 80,
-              height: 35,
+              height: 30,
             });
 
             // Draw signature image on Page 1, 2, and 3 footers
