@@ -123,7 +123,10 @@ function syncUsersAndDealersOnStartup() {
       else console.log('Successfully synchronized user credentials database table.');
     });
 
-    // 2. Synchronize dealers: update existing properties or insert if missing
+    // 2. Clear and reload all dealers to ensure profiles match server.js source code
+    db.run("DELETE FROM collections WHERE key = 'dealers'", (err) => {
+      if (err) console.error('Error clearing dealers:', err);
+    });
     defaultData.dealers.forEach((dealer) => {
       db.get("SELECT data FROM collections WHERE key = 'dealers' AND id = ?", [dealer.id], (err, row) => {
         if (!err) {
@@ -176,15 +179,11 @@ function checkAndSeedData() {
 const defaultData = {
   users: [
     { id: 'admin@greenvoltes.in', email: 'admin@greenvoltes.in', name: 'Arya Rajagopal', role: 'Admin', passwordHash: hashPassword('admin123', defaultSalt), salt: defaultSalt },
-    { id: 'gv001', email: 'gv001', name: 'Dinesh', role: 'Employee', employeeId: 'GV001', dealerId: 'D001', passwordHash: hashPassword('GV001dinesh', defaultSalt), salt: defaultSalt },
-    { id: 'gv002', email: 'gv002', name: 'Ganesh', role: 'Employee', employeeId: 'GV002', dealerId: 'D002', passwordHash: hashPassword('GV002ganesh', defaultSalt), salt: defaultSalt },
-    { id: 'gv003', email: 'gv003', name: 'Ruksana C R.', role: 'Employee', employeeId: 'GV003', dealerId: 'D003', passwordHash: hashPassword('GV003ruksana', defaultSalt), salt: defaultSalt },
-    { id: 'gv004', email: 'gv004', name: 'Yadhu krishnan S', role: 'Employee', employeeId: 'GV004', dealerId: 'D004', passwordHash: hashPassword('GV004yadu', defaultSalt), salt: defaultSalt },
-    { id: 'gv005', email: 'gv005', name: 'Vyshak', role: 'Employee', employeeId: 'GV005', dealerId: 'D005', passwordHash: hashPassword('GV005vyshak', defaultSalt), salt: defaultSalt },
-    { id: 'gv006', email: 'gv006', name: 'Kannan K S', role: 'Employee', employeeId: 'GV006', dealerId: 'D006', passwordHash: hashPassword('GV006kannan', defaultSalt), salt: defaultSalt },
-    { id: 'gv007', email: 'gv007', name: 'Rinku Mathew', role: 'Employee', employeeId: 'GV007', dealerId: 'D007', passwordHash: hashPassword('GV007rinku', defaultSalt), salt: defaultSalt },
-    { id: 'gv008', email: 'gv008', name: 'Aswin', role: 'Employee', employeeId: 'GV008', dealerId: 'D008', passwordHash: hashPassword('GV008aswin', defaultSalt), salt: defaultSalt },
-    { id: 'gv009', email: 'gv009', name: 'Anandu L', role: 'Employee', employeeId: 'GV009', dealerId: 'D009', passwordHash: hashPassword('GV009anandu', defaultSalt), salt: defaultSalt },
+    { id: 'gves-dlr-001', email: 'gves-dlr-001', name: 'Ruksana C R', role: 'Dealer', employeeId: 'GVES-DLR-001', dealerId: 'GVES-DLR-001', passwordHash: hashPassword('GVESDL0012001', defaultSalt), salt: defaultSalt },
+    { id: 'gves-dlr-002', email: 'gves-dlr-002', name: 'Yadhukrishnan', role: 'Dealer', employeeId: 'GVES-DLR-002', dealerId: 'GVES-DLR-002', passwordHash: hashPassword('GVESDL0022002', defaultSalt), salt: defaultSalt },
+    { id: 'gves-dlr-003', email: 'gves-dlr-003', name: 'Kannan K S', role: 'Dealer', employeeId: 'GVES-DLR-003', dealerId: 'GVES-DLR-003', passwordHash: hashPassword('GVESDL0032003', defaultSalt), salt: defaultSalt },
+    { id: 'gves-dlr-004', email: 'gves-dlr-004', name: 'Vyshak', role: 'Dealer', employeeId: 'GVES-DLR-004', dealerId: 'GVES-DLR-004', passwordHash: hashPassword('GVESDL0042004', defaultSalt), salt: defaultSalt },
+    { id: 'gves-dlr-005', email: 'gves-dlr-005', name: 'Rinku Mathew', role: 'Dealer', employeeId: 'GVES-DLR-005', dealerId: 'GVES-DLR-005', passwordHash: hashPassword('GVESDL0052005', defaultSalt), salt: defaultSalt },
     { id: 'customer@greenvoltes.in', email: 'customer@greenvoltes.in', name: 'George Joseph', role: 'Customer', passwordHash: hashPassword('customer123', defaultSalt), salt: defaultSalt },
     { id: 'anoop@greenvoltes.in', email: 'anoop@greenvoltes.in', name: 'Anoop Krishnan', role: 'Sales Manager', passwordHash: hashPassword('sales123', defaultSalt), salt: defaultSalt },
     { id: 'manu@greenvoltes.in', email: 'manu@greenvoltes.in', name: 'Manu Varghese', role: 'Site Survey Engineer', passwordHash: hashPassword('survey123', defaultSalt), salt: defaultSalt },
@@ -265,7 +264,7 @@ const defaultData = {
       state: 'Kerala',
       pincode: '686004',
       source: 'Dealer',
-      dealerId: 'D003',
+      dealerId: 'GVES-DLR-001',
       status: 'Order Confirmed',
       documents: {
         aadhaar: { name: 'aadhaar_george.pdf', uploaded: true },
@@ -343,41 +342,11 @@ const defaultData = {
 
   dealers: [
     {
-      id: 'D001',
-      name: 'Dinesh Solar',
-      contactPerson: 'Dinesh',
-      mobile: '8714889721',
-      email: 'gv001',
-      district: 'Alappuzha',
-      state: 'Kerala',
-      status: 'Approved',
-      assignedTerritory: 'Alappuzha & Ernakulam',
-      commissionRate: 5,
-      earnings: 0,
-      paidAmount: 0,
-      salesCount: 0
-    },
-    {
-      id: 'D002',
-      name: 'Ganesh Solar',
-      contactPerson: 'Ganesh',
-      mobile: '9633223787',
-      email: 'gv002',
-      district: 'Ernakulam',
-      state: 'Kerala',
-      status: 'Approved',
-      assignedTerritory: 'Alappuzha & Ernakulam',
-      commissionRate: 5,
-      earnings: 0,
-      paidAmount: 0,
-      salesCount: 0
-    },
-    {
-      id: 'D003',
+      id: 'GVES-DLR-001',
       name: 'Ruksana C R Solar',
-      contactPerson: 'Ruksana C R.',
+      contactPerson: 'Ruksana C R',
       mobile: '8129900484',
-      email: 'gv003',
+      email: 'gves-dlr-001',
       district: 'Ernakulam',
       state: 'Kerala',
       status: 'Approved',
@@ -388,11 +357,11 @@ const defaultData = {
       salesCount: 8
     },
     {
-      id: 'D004',
-      name: 'Yadhu krishnan S Solar',
-      contactPerson: 'Yadhu krishnan S',
+      id: 'GVES-DLR-002',
+      name: 'Yadhukrishnan Solar',
+      contactPerson: 'Yadhukrishnan',
       mobile: '8129920094',
-      email: 'gv004',
+      email: 'gves-dlr-002',
       district: 'Alappuzha',
       state: 'Kerala',
       status: 'Approved',
@@ -403,26 +372,11 @@ const defaultData = {
       salesCount: 2
     },
     {
-      id: 'D005',
-      name: 'Vyshak Solar',
-      contactPerson: 'Vyshak',
-      mobile: '7994005973',
-      email: 'gv005',
-      district: 'Alappuzha',
-      state: 'Kerala',
-      status: 'Approved',
-      assignedTerritory: 'Alappuzha',
-      commissionRate: 5,
-      earnings: 0,
-      paidAmount: 0,
-      salesCount: 0
-    },
-    {
-      id: 'D006',
+      id: 'GVES-DLR-003',
       name: 'Kannan K S Solar',
       contactPerson: 'Kannan K S',
       mobile: '9947762396',
-      email: 'gv006',
+      email: 'gves-dlr-003',
       district: 'Alappuzha',
       state: 'Kerala',
       status: 'Approved',
@@ -433,41 +387,26 @@ const defaultData = {
       salesCount: 0
     },
     {
-      id: 'D007',
+      id: 'GVES-DLR-004',
+      name: 'Vyshak Solar',
+      contactPerson: 'Vyshak',
+      mobile: '7994005973',
+      email: 'gves-dlr-004',
+      district: 'Alappuzha',
+      state: 'Kerala',
+      status: 'Approved',
+      assignedTerritory: 'Alappuzha',
+      commissionRate: 5,
+      earnings: 0,
+      paidAmount: 0,
+      salesCount: 0
+    },
+    {
+      id: 'GVES-DLR-005',
       name: 'Rinku Mathew Solar',
       contactPerson: 'Rinku Mathew',
       mobile: '7907347100',
-      email: 'gv007',
-      district: 'Alappuzha',
-      state: 'Kerala',
-      status: 'Approved',
-      assignedTerritory: 'Alappuzha',
-      commissionRate: 5,
-      earnings: 0,
-      paidAmount: 0,
-      salesCount: 0
-    },
-    {
-      id: 'D008',
-      name: 'Aswin Solar',
-      contactPerson: 'Aswin',
-      mobile: '8590544311',
-      email: 'gv008',
-      district: 'Alappuzha',
-      state: 'Kerala',
-      status: 'Approved',
-      assignedTerritory: 'Alappuzha',
-      commissionRate: 5,
-      earnings: 0,
-      paidAmount: 0,
-      salesCount: 0
-    },
-    {
-      id: 'D009',
-      name: 'Anandu L Solar',
-      contactPerson: 'Anandu L',
-      mobile: '9633591854',
-      email: 'gv009',
+      email: 'gves-dlr-005',
       district: 'Alappuzha',
       state: 'Kerala',
       status: 'Approved',

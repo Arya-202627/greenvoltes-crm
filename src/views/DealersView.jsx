@@ -9,7 +9,7 @@ import {
 
 export default function DealersView({ userRole, currentUser }) {
   const [db, setDb] = useState(getDb());
-  const [activeTab, setActiveTab] = useState(userRole === 'Employee' ? 'dashboard' : 'employees-list');
+  const [activeTab, setActiveTab] = useState(userRole === 'Dealer' ? 'dashboard' : 'employees-list');
   const [isAddCustomerOpen, setIsAddCustomerOpen] = useState(false);
   const [selectedDealer, setSelectedDealer] = useState(null);
   const [selectedLeadForDocs, setSelectedLeadForDocs] = useState(null);
@@ -64,7 +64,7 @@ export default function DealersView({ userRole, currentUser }) {
 
   useEffect(() => {
     setDb(getDb());
-    if (userRole === 'Employee') {
+    if (userRole === 'Dealer') {
       setActiveTab('dashboard');
     } else {
       setActiveTab('employees-list');
@@ -162,26 +162,21 @@ export default function DealersView({ userRole, currentUser }) {
   };
 
   // Filter leads registered by this dealer
-  const mySubmissions = db.leads.filter(l => l.dealerId === myDealer.id);
+  const mySubmissions = db.leads.filter(l => l.dealerId === myDealer.id && l.status === 'Order Confirmed');
 
   return (
     <div className="dealers-view">
       <div className="view-header-row">
         <div>
-          <h2 className="view-title"><Handshake className="view-icon-color" /> Employee Portal</h2>
-          <p className="view-subtitle">Monitor Greenvoltes employee/franchise partner submissions, register customers, and check commission/payout accounts.</p>
+          <h2 className="view-title"><Handshake className="view-icon-color" /> Dealer Portal</h2>
+          <p className="view-subtitle">Monitor Greenvoltes dealer submissions and check commission/payout accounts.</p>
         </div>
-        {userRole === 'Employee' && (
-          <button className="btn btn-primary" onClick={() => setIsAddCustomerOpen(true)}>
-            <Plus size={16} /> Register Customer
-          </button>
-        )}
       </div>
 
       {userRole === 'Admin' ? (
         <div className="tab-container">
           <button className={`tab-btn ${activeTab === 'employees-list' ? 'active' : ''}`} onClick={() => setActiveTab('employees-list')}>
-            Employee Directory
+            Dealer Directory
           </button>
           <button className={`tab-btn ${activeTab === 'perform' ? 'active' : ''}`} onClick={() => setActiveTab('perform')}>
             Performance Oversight
@@ -189,8 +184,8 @@ export default function DealersView({ userRole, currentUser }) {
         </div>
       ) : null}
 
-      {/* ---------------- EMPLOYEE SPECIFIC VIEW ---------------- */}
-      {userRole === 'Employee' && (
+      {/* ---------------- DEALER SPECIFIC VIEW ---------------- */}
+      {userRole === 'Dealer' && (
         <div className="dealer-dashboard-layout">
           {/* Dealer Stats */}
           <div className="grid-cols-4" style={{ marginBottom: '20px' }}>
@@ -199,7 +194,7 @@ export default function DealersView({ userRole, currentUser }) {
                 <Users size={18} />
               </div>
               <div className="metric-details">
-                <h4>Registered Leads</h4>
+                <h4>Confirmed Orders</h4>
                 <p>{mySubmissions.length}</p>
               </div>
             </div>
@@ -275,7 +270,7 @@ export default function DealersView({ userRole, currentUser }) {
                   ))}
                   {mySubmissions.length === 0 && (
                     <tr>
-                      <td colSpan={6} style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No customers registered yet. Click "Register Customer" to submit details.</td>
+                      <td colSpan={6} style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No confirmed orders assigned to your profile yet.</td>
                     </tr>
                   )}
                 </tbody>
@@ -288,13 +283,13 @@ export default function DealersView({ userRole, currentUser }) {
       {/* ---------------- ADMIN SPECIFIC VIEW ---------------- */}
       {userRole === 'Admin' && activeTab === 'employees-list' && (
         <div className="glass-card">
-          <h3 className="card-title" style={{ marginBottom: '16px' }}>Approved Solar Employee & Franchise Directory</h3>
+          <h3 className="card-title" style={{ marginBottom: '16px' }}>Approved Solar Dealer & Franchise Directory</h3>
           <div className="table-responsive">
             <table className="custom-table">
               <thead>
                 <tr>
-                  <th>Employee ID</th>
-                  <th>Employee/Agency Name</th>
+                  <th>Dealer ID</th>
+                  <th>Dealer/Agency Name</th>
                   <th>Contact Person</th>
                   <th>District</th>
                   <th>Assigned Territory</th>
@@ -340,12 +335,12 @@ export default function DealersView({ userRole, currentUser }) {
 
       {userRole === 'Admin' && activeTab === 'perform' && (
         <div className="glass-card">
-          <h3 className="card-title" style={{ marginBottom: '16px' }}>Employee Commission & Payout Registry</h3>
+          <h3 className="card-title" style={{ marginBottom: '16px' }}>Dealer Commission & Payout Registry</h3>
           <div className="table-responsive">
             <table className="custom-table">
               <thead>
                 <tr>
-                  <th>Employee / Agency</th>
+                  <th>Dealer / Agency</th>
                   <th>Bookings</th>
                   <th>Sales Volume (Simulated)</th>
                   <th>Total Commissions</th>
@@ -391,224 +386,7 @@ export default function DealersView({ userRole, currentUser }) {
         </div>
       )}
 
-      {/* Employee Customer Registration Modal */}
-      <Modal isOpen={isAddCustomerOpen} onClose={() => setIsAddCustomerOpen(false)} title="Employee Client Intake Form">
-        <form onSubmit={handleRegisterCustomer} className="dealer-new-customer-form">
-          <div className="form-row">
-            <div className="form-group">
-              <label>Applicant Name *</label>
-              <input 
-                type="text" 
-                required 
-                className="form-control"
-                value={newCust.name}
-                onChange={(e) => setNewCust({ ...newCust, name: e.target.value })}
-              />
-            </div>
-            <div className="form-group">
-              <label>Applicant Age *</label>
-              <input 
-                type="number" 
-                required 
-                className="form-control"
-                value={newCust.age}
-                onChange={(e) => setNewCust({ ...newCust, age: e.target.value })}
-              />
-            </div>
-          </div>
 
-          {/* Co-applicant details if client is above 65 */}
-          {parseInt(newCust.age) > 65 && (
-            <div className="co-applicant-container" style={{ border: '1px dashed var(--primary)', padding: '12px', borderRadius: '4px', marginBottom: '16px', background: 'var(--primary-glow)' }}>
-              <h4 style={{ fontSize: '12px', color: 'var(--primary)', marginBottom: '8px', fontWeight: 'bold' }}>Co-Applicant Required (Client is above 65 years)</h4>
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Co-Applicant Name *</label>
-                  <input 
-                    type="text" 
-                    required 
-                    className="form-control"
-                    value={newCust.coApplicantName}
-                    onChange={(e) => setNewCust({ ...newCust, coApplicantName: e.target.value })}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Mobile Number *</label>
-                  <input 
-                    type="tel" 
-                    required 
-                    className="form-control"
-                    value={newCust.coApplicantPhone}
-                    onChange={(e) => setNewCust({ ...newCust, coApplicantPhone: e.target.value })}
-                  />
-                </div>
-              </div>
-              <div className="form-group">
-                <label>Relationship with Applicant *</label>
-                <input 
-                  type="text" 
-                  required 
-                  className="form-control"
-                  value={newCust.coApplicantRelation}
-                  onChange={(e) => setNewCust({ ...newCust, coApplicantRelation: e.target.value })}
-                  placeholder="E.g., Son, Daughter, Spouse"
-                />
-              </div>
-            </div>
-          )}
-
-          <div className="form-row">
-            <div className="form-group">
-              <label>Phone Number *</label>
-              <input 
-                type="tel" 
-                required 
-                className="form-control"
-                value={newCust.phone}
-                onChange={(e) => setNewCust({ ...newCust, phone: e.target.value })}
-              />
-            </div>
-            <div className="form-group">
-              <label>Email ID</label>
-              <input 
-                type="email" 
-                className="form-control"
-                value={newCust.email}
-                onChange={(e) => setNewCust({ ...newCust, email: e.target.value })}
-              />
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label>Installation Address *</label>
-            <textarea 
-              required 
-              rows={2} 
-              className="form-control"
-              value={newCust.address}
-              onChange={(e) => setNewCust({ ...newCust, address: e.target.value })}
-            />
-          </div>
-
-          <div className="form-row">
-            <div className="form-group">
-              <label>Roof Construction Type</label>
-              <select 
-                className="form-control"
-                value={newCust.roofType}
-                onChange={(e) => setNewCust({ ...newCust, roofType: e.target.value })}
-              >
-                <option value="Concrete Flat Roof">Concrete Flat Roof</option>
-                <option value="Slanted Tile Roof">Slanted Tile Roof</option>
-                <option value="Truss Metal Sheet Roof">Truss Metal Sheet Roof</option>
-              </select>
-            </div>
-            <div className="form-group">
-              <label>Requested Project Size (kW) *</label>
-              <input 
-                type="number" 
-                required 
-                className="form-control"
-                value={newCust.projectSize}
-                onChange={(e) => setNewCust({ ...newCust, projectSize: e.target.value })}
-              />
-            </div>
-          </div>
-
-          <div className="form-row">
-            <div className="form-group">
-              <label>Preferred Inverter Type</label>
-              <select 
-                className="form-control"
-                value={newCust.inverterBrand}
-                onChange={(e) => setNewCust({ ...newCust, inverterBrand: e.target.value })}
-              >
-                <optgroup label="Ongrid - G TIE">
-                  <option value="APS (Recommended)">APS (Recommended)</option>
-                  <option value="Deye (G TIE)">Deye</option>
-                  <option value="Solaire (G TIE)">Solaire</option>
-                  <option value="Foxess">Foxess</option>
-                  <option value="Eastman (G TIE)">Eastman</option>
-                  <option value="Solar Edge with Optimizer">Solar Edge with Optimizer</option>
-                </optgroup>
-                <optgroup label="Ongrid - Micro Inverter">
-                  <option value="Hoymiles Micro inverter">Hoymiles Micro inverter</option>
-                  <option value="T-sun Micro inverter">T-sun Micro inverter</option>
-                  <option value="Deye Micro Inverter">Deye Micro Inverter</option>
-                  <option value="Jio Spark Micro Inverter">Jio Spark Micro Inverter</option>
-                  <option value="Enphase Micro Inverter (Premium)">Enphase Micro Inverter (Premium)</option>
-                </optgroup>
-                <optgroup label="Hybrid">
-                  <option value="Deye (Hybrid)">Deye</option>
-                  <option value="Solaire (Hybrid)">Solaire</option>
-                  <option value="Eastman (Hybrid)">Eastman</option>
-                </optgroup>
-                <optgroup label="Offgrid">
-                  <option value="Ashapower">Ashapower</option>
-                  <option value="Microtek">Microtek</option>
-                  <option value="UTL Solar">UTL Solar</option>
-                  <option value="Luminous Solar">Luminous Solar</option>
-                  <option value="Eastman (Offgrid)">Eastman</option>
-                </optgroup>
-              </select>
-            </div>
-            <div className="form-group">
-              <label>Preferred Panel Brand</label>
-              <select 
-                className="form-control"
-                value={newCust.panelBrand}
-                onChange={(e) => setNewCust({ ...newCust, panelBrand: e.target.value })}
-              >
-                <optgroup label="Topcon">
-                  <option value="APS Topcon 600 (Recommended)">APS Topcon 600 (Recommended)</option>
-                  <option value="Waaree Topcon">Waaree Topcon</option>
-                  <option value="Adani Topcon">Adani Topcon</option>
-                </optgroup>
-                <optgroup label="Bifacial">
-                  <option value="APS Bifacial 550">APS Bifacial 550</option>
-                  <option value="Waaree Bifacial 540">Waaree Bifacial 540</option>
-                  <option value="Adani Bifacial 550">Adani Bifacial 550</option>
-                </optgroup>
-              </select>
-            </div>
-          </div>
-
-          <div className="form-row">
-            <div className="form-group">
-              <label>Solar Loan Required?</label>
-              <select 
-                className="form-control"
-                value={newCust.loanRequired}
-                onChange={(e) => setNewCust({ ...newCust, loanRequired: e.target.value })}
-              >
-                <option value="No">No (Cash/Self Fund)</option>
-                <option value="Yes">Yes (SBI/Federal Bank)</option>
-              </select>
-            </div>
-            {newCust.loanRequired === 'Yes' && (
-              <div className="form-group">
-                <label>Estimated Loan Amount Needed</label>
-                <input 
-                  type="number" 
-                  className="form-control"
-                  value={newCust.loanAmount}
-                  onChange={(e) => setNewCust({ ...newCust, loanAmount: e.target.value })}
-                  placeholder="E.g., 150000"
-                />
-              </div>
-            )}
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '20px' }}>
-            <button type="button" className="btn btn-secondary" onClick={() => setIsAddCustomerOpen(false)}>
-              Cancel
-            </button>
-            <button type="submit" className="btn btn-primary">
-              Submit Customer Details
-            </button>
-          </div>
-        </form>
-      </Modal>
 
       {/* Dealer DMS Files Upload Modal */}
       <Modal 

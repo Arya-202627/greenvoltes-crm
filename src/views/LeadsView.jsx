@@ -77,7 +77,7 @@ export default function LeadsView({ userRole, currentUser }) {
   const getEmployeeName = (lead) => {
     if (lead.dealerId) {
       const dealer = dealers.find(d => d.id === lead.dealerId);
-      return dealer ? (dealer.contactPerson || dealer.name) : `Employee (${lead.dealerId})`;
+      return dealer ? (dealer.contactPerson || dealer.name) : `Dealer (${lead.dealerId})`;
     }
     return lead.source || 'Direct';
   };
@@ -120,12 +120,12 @@ export default function LeadsView({ userRole, currentUser }) {
       }
     };
 
-    if (userRole === 'Employee' && myEmployee) {
-      leadData.source = 'Employee';
+    if (userRole === 'Dealer' && myEmployee) {
+      leadData.source = 'Dealer';
       leadData.dealerId = myEmployee.id;
       leadData.district = myEmployee.district;
       leadData.state = myEmployee.state;
-      leadData.notes = `Registered by employee ${myEmployee.name}. ${newLead.notes || ''}`;
+      leadData.notes = `Registered by dealer ${myEmployee.name}. ${newLead.notes || ''}`;
 
       // Update employee sales count and commission
       const fullDb = getDb();
@@ -797,7 +797,7 @@ export default function LeadsView({ userRole, currentUser }) {
   // Filter Leads
   const filteredLeads = leads.filter(lead => {
     // Role-based visibility isolation:
-    if (userRole === 'Employee' && myEmployee) {
+    if (userRole === 'Dealer' && myEmployee) {
       if (lead.dealerId !== myEmployee.id) return false;
     }
 
@@ -819,11 +819,11 @@ export default function LeadsView({ userRole, currentUser }) {
     <div className="leads-view">
       <div className="view-header-row">
         <div>
-          <h2 className="view-title"><UserPlus className="view-icon-color" /> Leads & Customer CRM</h2>
+          <h2 className="view-title"><UserPlus className="view-icon-color" /> Customer CRM</h2>
           <p className="view-subtitle">Monitor inquiries, schedule site surveys, compile KSEB applications, and store KYC files.</p>
         </div>
         <button className="btn btn-primary" onClick={() => setIsNewLeadOpen(true)}>
-          <Plus size={16} /> Add New Lead
+          <Plus size={16} /> Add Customer
         </button>
       </div>
 
@@ -840,10 +840,10 @@ export default function LeadsView({ userRole, currentUser }) {
           />
         </div>
         <div className="filter-group">
-          {userRole !== 'Employee' && (
+          {userRole !== 'Dealer' && (
             <select value={dealerFilter} onChange={(e) => setDealerFilter(e.target.value)} className="filter-dropdown">
-              <option value="All">All Employees / Sources</option>
-              <option value="Direct">Direct (No Employee)</option>
+              <option value="All">All Dealers / Sources</option>
+              <option value="Direct">Direct (No Dealer)</option>
               {dealers.map(d => (
                 <option key={d.id} value={d.id}>{d.contactPerson || d.name}</option>
               ))}
@@ -869,7 +869,7 @@ export default function LeadsView({ userRole, currentUser }) {
                 <tr>
                   <th>Lead ID</th>
                   <th>Customer Name</th>
-                  {userRole !== 'Employee' && <th>Employee / Source</th>}
+                  {userRole !== 'Dealer' && <th>Dealer / Source</th>}
                   <th>Contact</th>
                   <th>District</th>
                   <th>Status</th>
@@ -885,7 +885,7 @@ export default function LeadsView({ userRole, currentUser }) {
                   >
                     <td><code>{lead.id}</code></td>
                     <td style={{ fontWeight: '600' }}>{lead.name}</td>
-                    {userRole !== 'Employee' && <td>{getEmployeeName(lead)}</td>}
+                    {userRole !== 'Dealer' && <td>{getEmployeeName(lead)}</td>}
                     <td>{lead.mobile}</td>
                     <td>{lead.district}</td>
                     <td>
@@ -1085,7 +1085,7 @@ export default function LeadsView({ userRole, currentUser }) {
       </div>
 
       {/* New Lead Modal */}
-      <Modal isOpen={isNewLeadOpen} onClose={() => setIsNewLeadOpen(false)} title="Register New Solar Inquiry">
+      <Modal isOpen={isNewLeadOpen} onClose={() => setIsNewLeadOpen(false)} title="Register New Customer">
         <form onSubmit={handleCreateLead} className="new-lead-form">
           <div className="form-row">
             <div className="form-group">
@@ -1216,6 +1216,25 @@ export default function LeadsView({ userRole, currentUser }) {
             </div>
           </div>
 
+          {newLead.source === 'Dealer' && (
+            <div className="form-row">
+              <div className="form-group">
+                <label>Referring Dealer *</label>
+                <select
+                  required
+                  className="form-control"
+                  value={newLead.dealerId || ''}
+                  onChange={(e) => setNewLead(prev => ({ ...prev, dealerId: e.target.value }))}
+                >
+                  <option value="">Select Referring Dealer</option>
+                  {dealers.map(d => (
+                    <option key={d.id} value={d.id}>{d.contactPerson || d.name} ({d.id})</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          )}
+
           <div className="form-group">
             <label>Internal Notes / Requirements</label>
             <textarea 
@@ -1232,7 +1251,7 @@ export default function LeadsView({ userRole, currentUser }) {
               Cancel
             </button>
             <button type="submit" className="btn btn-primary">
-              Register Lead
+              Register Customer
             </button>
           </div>
         </form>
