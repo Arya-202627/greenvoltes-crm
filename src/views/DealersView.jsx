@@ -14,6 +14,8 @@ export default function DealersView({ userRole, currentUser }) {
   const [selectedDealer, setSelectedDealer] = useState(null);
   const [selectedLeadForDocs, setSelectedLeadForDocs] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(null); // { docKey, percent }
+  const [viewingFileUrl, setViewingFileUrl] = useState(null);
+  const [viewingFileName, setViewingFileName] = useState('');
 
 
   const handleDealerFileUpload = async (docKey) => {
@@ -169,6 +171,80 @@ export default function DealersView({ userRole, currentUser }) {
 
   // Filter leads registered by this dealer
   const mySubmissions = db.leads.filter(l => l.dealerId === myDealer.id && l.status === 'Order Confirmed');
+
+  if (viewingFileUrl) {
+    const cleanUrl = viewingFileUrl.split('?')[0].toLowerCase();
+    const isPdf = cleanUrl.endsWith('.pdf');
+    const isImage = /\.(jpg|jpeg|png|gif|svg)$/i.test(cleanUrl);
+
+    return (
+      <div className="file-viewer-overlay" style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: '#0b0f17',
+        zIndex: 9999,
+        display: 'flex',
+        flexDirection: 'column',
+        fontFamily: 'var(--font-primary)'
+      }}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          padding: '16px 24px',
+          borderBottom: '1px solid var(--border-color)',
+          background: 'rgba(17, 24, 39, 0.95)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <button 
+              className="btn btn-secondary" 
+              onClick={() => {
+                setViewingFileUrl(null);
+                setViewingFileName('');
+              }}
+              style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px' }}
+            >
+              ← Back to Portal
+            </button>
+            <span style={{ fontSize: '15px', fontWeight: '600', color: '#f3f4f6' }}>
+              Viewing: {viewingFileName}
+            </span>
+          </div>
+          <a 
+            href={viewingFileUrl} 
+            download 
+            className="btn btn-primary"
+            style={{ padding: '8px 16px', display: 'inline-flex', alignItems: 'center', gap: '6px', textDecoration: 'none' }}
+          >
+            Download File
+          </a>
+        </div>
+        <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '24px', overflow: 'auto' }}>
+          {isPdf ? (
+            <iframe 
+              src={viewingFileUrl} 
+              style={{ width: '100%', height: '100%', border: 'none', borderRadius: '8px', background: '#fff' }}
+              title="PDF Viewer"
+            />
+          ) : isImage ? (
+            <img 
+              src={viewingFileUrl} 
+              alt={viewingFileName} 
+              style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', borderRadius: '8px', boxShadow: '0 10px 25px rgba(0,0,0,0.5)' }}
+            />
+          ) : (
+            <div style={{ textAlign: 'center', color: 'var(--text-muted)' }}>
+              <p style={{ marginBottom: '16px' }}>This file type cannot be previewed directly.</p>
+              <a href={viewingFileUrl} download className="btn btn-primary">Download to View</a>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="dealers-view">
@@ -445,7 +521,10 @@ export default function DealersView({ userRole, currentUser }) {
                           textDecoration: 'underline',
                           fontWeight: '600'
                         }}
-                        onClick={() => window.open(getUploadUrl(doc.name), '_blank')}
+                        onClick={() => {
+                          setViewingFileUrl(getUploadUrl(doc.name));
+                          setViewingFileName(doc.originalName || doc.name);
+                        }}
                       >
                         <Check size={14} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'middle' }} />
                         {doc.name.substring(0, 12)}...
