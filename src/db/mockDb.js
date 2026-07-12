@@ -234,6 +234,21 @@ const defaultData = {
       earnings: 0,
       paidAmount: 0,
       salesCount: 0
+    },
+    {
+      id: 'GVES-DLR-006',
+      name: 'Anandhu Solar',
+      contactPerson: 'Anandhu',
+      mobile: '9633591854',
+      email: 'gves-dlr-006',
+      district: 'Alappuzha',
+      state: 'Kerala',
+      status: 'Approved',
+      assignedTerritory: 'Alappuzha',
+      commissionRate: 5,
+      earnings: 0,
+      paidAmount: 0,
+      salesCount: 0
     }
   ],
 

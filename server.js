@@ -193,7 +193,12 @@ const defaultData = {
     { id: 'rahul@greenvoltes.in', email: 'rahul@greenvoltes.in', name: 'Rahul R.', role: 'Accounts Executive', passwordHash: hashPassword('accounts123', defaultSalt), salt: defaultSalt },
     { id: 'gokul@greenvoltes.in', email: 'gokul@greenvoltes.in', name: 'Gokul Krishna', role: 'Service Engineer', passwordHash: hashPassword('service123', defaultSalt), salt: defaultSalt },
     { id: 'amal@greenvoltes.in', email: 'amal@greenvoltes.in', name: 'Amal Dev', role: 'Installation Team', passwordHash: hashPassword('install123', defaultSalt), salt: defaultSalt },
-    { id: 'staff', email: 'staff', name: 'Office Staff', role: 'Office Staff', passwordHash: hashPassword('staff123', defaultSalt), salt: defaultSalt }
+    { id: 'staff', email: 'staff', name: 'Office Staff', role: 'Office Staff', passwordHash: hashPassword('staff123', defaultSalt), salt: defaultSalt },
+    { id: 'gves-dlr-006', email: 'gves-dlr-006', name: 'Anandhu', role: 'Dealer', employeeId: 'GVES-DLR-006', dealerId: 'GVES-DLR-006', passwordHash: hashPassword('GVESDLR2006', defaultSalt), salt: defaultSalt },
+    { id: 'gves-emp-mg01', email: 'gves-emp-mg01', name: 'Dinesh', role: 'Sales Manager', employeeId: 'GVES-EMP-MG01', passwordHash: hashPassword('GVESEMPMG012001', defaultSalt), salt: defaultSalt },
+    { id: 'gves-emp-mg02', email: 'gves-emp-mg02', name: 'Ganesh', role: 'Sales Manager', employeeId: 'GVES-EMP-MG02', passwordHash: hashPassword('GVESEMPMG012001', defaultSalt), salt: defaultSalt },
+    { id: 'gves-emp-sl01', email: 'gves-emp-sl01', name: 'Aswin KS', role: 'Sales Executive', employeeId: 'GVES-EMP-SL01', passwordHash: hashPassword('GVESEMPSL012001', defaultSalt), salt: defaultSalt },
+    { id: 'gves-emp-fn01', email: 'gves-emp-fn01', name: 'Rohit H', role: 'Accounts Executive', employeeId: 'GVES-EMP-FN01', passwordHash: hashPassword('GVESEMPFN012001', defaultSalt), salt: defaultSalt }
   ],
 
   leads: [
@@ -407,6 +412,21 @@ const defaultData = {
       contactPerson: 'Rinku Mathew',
       mobile: '7907347100',
       email: 'gves-dlr-005',
+      district: 'Alappuzha',
+      state: 'Kerala',
+      status: 'Approved',
+      assignedTerritory: 'Alappuzha',
+      commissionRate: 5,
+      earnings: 0,
+      paidAmount: 0,
+      salesCount: 0
+    },
+    {
+      id: 'GVES-DLR-006',
+      name: 'Anandhu Solar',
+      contactPerson: 'Anandhu',
+      mobile: '9633591854',
+      email: 'gves-dlr-006',
       district: 'Alappuzha',
       state: 'Kerala',
       status: 'Approved',
