@@ -55,6 +55,7 @@ export default function LeadsView({ userRole, currentUser }) {
   // Modals state
   const [isNewLeadOpen, setIsNewLeadOpen] = useState(false);
   const [activeLead, setActiveLead] = useState(null);
+  const [uploadProgress, setUploadProgress] = useState(null); // { docKey, percent }
   
   // Form fields
   const [newLead, setNewLead] = useState({
@@ -176,7 +177,10 @@ export default function LeadsView({ userRole, currentUser }) {
       if (!file) return;
       
       try {
-        const uploadedData = await uploadFileToServer(file);
+        setUploadProgress({ docKey, percent: 0 });
+        const uploadedData = await uploadFileToServer(file, (percent) => {
+          setUploadProgress({ docKey, percent });
+        });
         const updatedLead = {
           ...activeLead,
           documents: {
@@ -192,8 +196,10 @@ export default function LeadsView({ userRole, currentUser }) {
         saveLead(updatedLead);
         setActiveLead(updatedLead);
         refreshLeads();
+        setUploadProgress(null);
         alert(`Successfully uploaded ${file.name}!`);
       } catch (err) {
+        setUploadProgress(null);
         console.error('File upload failed:', err);
         alert('File upload failed. Make sure the backend server is running.');
       }
@@ -963,7 +969,14 @@ export default function LeadsView({ userRole, currentUser }) {
                             .replace('BANKPASSBOOK', 'BANK PASSBOOK')
                             .replace('SIGNATURE', 'CUSTOMER SIGNATURE')}
                         </span>
-                        {doc.uploaded ? (
+                        {uploadProgress && uploadProgress.docKey === key ? (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '120px' }}>
+                            <div style={{ flex: 1, backgroundColor: 'rgba(255, 255, 255, 0.1)', height: '6px', borderRadius: '3px', overflow: 'hidden' }}>
+                              <div style={{ backgroundColor: 'var(--primary)', height: '100%', width: `${uploadProgress.percent}%` }}></div>
+                            </div>
+                            <span style={{ fontSize: '11px', fontWeight: '600', color: 'var(--primary)' }}>{uploadProgress.percent}%</span>
+                          </div>
+                        ) : doc.uploaded ? (
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                              <span 
                               className="doc-status-ok" 

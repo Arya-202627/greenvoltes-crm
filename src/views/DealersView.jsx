@@ -13,6 +13,7 @@ export default function DealersView({ userRole, currentUser }) {
   const [isAddCustomerOpen, setIsAddCustomerOpen] = useState(false);
   const [selectedDealer, setSelectedDealer] = useState(null);
   const [selectedLeadForDocs, setSelectedLeadForDocs] = useState(null);
+  const [uploadProgress, setUploadProgress] = useState(null); // { docKey, percent }
 
 
   const handleDealerFileUpload = async (docKey) => {
@@ -27,7 +28,10 @@ export default function DealersView({ userRole, currentUser }) {
       if (!file) return;
       
       try {
-        const uploadedData = await uploadFileToServer(file);
+        setUploadProgress({ docKey, percent: 0 });
+        const uploadedData = await uploadFileToServer(file, (percent) => {
+          setUploadProgress({ docKey, percent });
+        });
         
         const updatedDb = { ...db };
         const leadIdx = updatedDb.leads.findIndex(l => l.id === selectedLeadForDocs.id);
@@ -44,9 +48,11 @@ export default function DealersView({ userRole, currentUser }) {
           saveDb(updatedDb);
           setDb(updatedDb);
           setSelectedLeadForDocs(updatedDb.leads[leadIdx]);
+          setUploadProgress(null);
           alert(`Successfully uploaded ${file.name}!`);
         }
       } catch (err) {
+        setUploadProgress(null);
         console.error('File upload failed:', err);
         alert('File upload failed. Please try again.');
       }
@@ -422,7 +428,14 @@ export default function DealersView({ userRole, currentUser }) {
                 }}>
                   <span style={{ fontSize: '13px', fontWeight: '500' }}>{label}</span>
                   
-                  {doc?.uploaded ? (
+                  {uploadProgress && uploadProgress.docKey === key ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '120px' }}>
+                      <div style={{ flex: 1, backgroundColor: 'rgba(255, 255, 255, 0.1)', height: '6px', borderRadius: '3px', overflow: 'hidden' }}>
+                        <div style={{ backgroundColor: 'var(--primary)', height: '100%', width: `${uploadProgress.percent}%` }}></div>
+                      </div>
+                      <span style={{ fontSize: '11px', fontWeight: '600', color: 'var(--primary)' }}>{uploadProgress.percent}%</span>
+                    </div>
+                  ) : doc?.uploaded ? (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <span 
                         style={{ 

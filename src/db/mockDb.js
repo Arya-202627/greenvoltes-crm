@@ -687,22 +687,39 @@ export const deleteCollectionItem = (key, id) => {
   return db[key];
 };
 
-// File upload API helper
-export const uploadFileToServer = async (file) => {
-  try {
+export const uploadFileToServer = (file, onProgress) => {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', `${API_BASE}/upload`);
+
+    if (onProgress) {
+      xhr.upload.addEventListener('progress', (e) => {
+        if (e.lengthComputable) {
+          const percent = Math.round((e.loaded / e.total) * 100);
+          onProgress(percent);
+        }
+      });
+    }
+
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          const resData = JSON.parse(xhr.responseText);
+          resolve(resData);
+        } catch (err) {
+          reject(new Error('Invalid JSON response from server'));
+        }
+      } else {
+        reject(new Error(`Upload failed with status ${xhr.status}`));
+      }
+    };
+
+    xhr.onerror = () => reject(new Error('Network error during upload'));
+
     const formData = new FormData();
     formData.append('file', file);
-    const res = await fetch(`${API_BASE}/upload`, {
-      method: 'POST',
-      body: formData
-    });
-    if (!res.ok) throw new Error('Upload request failed');
-    const responseData = await res.json();
-    return responseData; // returns { name, originalName, size, url }
-  } catch (e) {
-    console.error('Error in uploadFileToServer:', e);
-    throw e;
-  }
+    xhr.send(formData);
+  });
 };
 
 // Login user API helper
