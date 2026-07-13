@@ -38,7 +38,7 @@ export default function LoginView({ onLoginSuccess }) {
         </div>
 
         {/* Login form */}
-        <form onSubmit={handleLogin} className="login-form">
+        <form onSubmit={handleLogin} className="login-form" autoComplete="off">
           {error && (
             <div className="login-error-alert">
               <span>{error}</span>
@@ -56,6 +56,7 @@ export default function LoginView({ onLoginSuccess }) {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={loading}
+                autoComplete="off"
               />
             </div>
           </div>
@@ -71,6 +72,7 @@ export default function LoginView({ onLoginSuccess }) {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={loading}
+                autoComplete="off"
               />
             </div>
           </div>
