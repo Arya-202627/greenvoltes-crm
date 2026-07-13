@@ -1,33 +1,13 @@
 // LoginView.jsx
 import React, { useState } from 'react';
 import { loginUserToServer } from '../db/mockDb';
-import { ShieldCheck, Mail, Lock, Sparkles, ChevronDown, ChevronUp } from 'lucide-react';
+import { Mail, Lock } from 'lucide-react';
 
 export default function LoginView({ onLoginSuccess }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [showDemoDrawer, setShowDemoDrawer] = useState(false);
-
-  const demoUsers = [
-    { email: 'admin@greenvoltes.in', pass: 'admin123', role: 'Admin' },
-    { email: 'GVES-DLR-001', pass: 'GVESDL0012001', role: 'Dealer (Ruksana C R)' },
-    { email: 'GVES-DLR-002', pass: 'GVESDL0022002', role: 'Dealer (Yadhukrishnan)' },
-    { email: 'GVES-DLR-003', pass: 'GVESDL0032003', role: 'Dealer (Kannan K S)' },
-    { email: 'GVES-DLR-004', pass: 'GVESDL0042004', role: 'Dealer (Vyshak)' },
-    { email: 'GVES-DLR-005', pass: 'GVESDL0052005', role: 'Dealer (Rinku Mathew)' },
-    { email: 'GVES-DLR-006', pass: 'GVESDLR2006', role: 'Dealer (Anandhu)' },
-    { email: 'GVES-EMP-MG01', pass: 'GVESEMPMG012001', role: 'Sales Manager (Dinesh)' },
-    { email: 'GVES-EMP-MG02', pass: 'GVESEMPMG012001', role: 'Sales Manager (Ganesh)' },
-    { email: 'GVES-EMP-SL01', pass: 'GVESEMPSL012001', role: 'Sales Executive (Aswin KS)' },
-    { email: 'GVES-EMP-FN01', pass: 'GVESEMPFN012001', role: 'Accounts Executive (Rohit H)' },
-    { email: 'customer@greenvoltes.in', pass: 'customer123', role: 'Customer' },
-    { email: 'anoop@greenvoltes.in', pass: 'sales123', role: 'Sales Manager' },
-    { email: 'manu@greenvoltes.in', pass: 'survey123', role: 'Site Survey Engineer' },
-    { email: 'devan@greenvoltes.in', pass: 'design123', role: 'Design Engineer' },
-    { email: 'staff', pass: 'staff123', role: 'Office Staff' }
-  ];
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -44,12 +24,6 @@ export default function LoginView({ onLoginSuccess }) {
     } finally {
       setLoading(false);
     }
-  };
-
-  const fillCredentials = (demoEmail, demoPass) => {
-    setEmail(demoEmail);
-    setPassword(demoPass);
-    setError(null);
   };
 
   return (
@@ -105,37 +79,6 @@ export default function LoginView({ onLoginSuccess }) {
             {loading ? 'Authenticating...' : 'Secure Login'}
           </button>
         </form>
-
-        {/* Demo Credentials Drawer */}
-        <div className="demo-credentials-section">
-          <button 
-            type="button" 
-            onClick={() => setShowDemoDrawer(!showDemoDrawer)} 
-            className="demo-toggle-btn"
-          >
-            <span><Sparkles size={12} style={{ display: 'inline', marginRight: '6px' }} /> Quick Demo Logins</span>
-            {showDemoDrawer ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-          </button>
-
-          {showDemoDrawer && (
-            <div className="demo-drawer-content">
-              <p className="drawer-hint">Select a staff/partner profile to auto-fill credentials:</p>
-              <div className="demo-badges-grid">
-                {demoUsers.map((user) => (
-                  <button
-                    key={user.role}
-                    type="button"
-                    className="demo-profile-badge"
-                    onClick={() => fillCredentials(user.email, user.pass)}
-                  >
-                    <span className="demo-role">{user.role}</span>
-                    <span className="demo-email">{user.email}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
       </div>
 
       <style>{`
