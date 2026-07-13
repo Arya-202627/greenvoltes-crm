@@ -94,7 +94,7 @@ function App() {
   // Map of views to check role authorization
   const viewPermissions = {
     ceo: ['Admin', 'Sales Manager'],
-    leads: ['Admin', 'Sales Manager', 'Sales Executive', 'Office Staff', 'Dealer'],
+    leads: ['Admin', 'Sales Manager', 'Sales Executive', 'Office Staff', 'Dealer', 'Accounts Executive'],
     dealer: ['Admin', 'Dealer'],
     surveys: ['Admin', 'Site Survey Engineer'],
     quotes: ['Admin', 'Sales Manager', 'Sales Executive'],

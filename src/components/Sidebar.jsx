@@ -10,7 +10,7 @@ export default function Sidebar({ activeView, setActiveView, userRole, isOpen, s
   // Navigation list with icons and role access
   const allNavItems = [
     { id: 'ceo', label: 'CEO Dashboard', icon: BarChart3, roles: ['Admin', 'Sales Manager'] },
-    { id: 'leads', label: 'Customer CRM', icon: Users, roles: ['Admin', 'Sales Manager', 'Sales Executive', 'Office Staff', 'Dealer'] },
+    { id: 'leads', label: 'Customer CRM', icon: Users, roles: ['Admin', 'Sales Manager', 'Sales Executive', 'Office Staff', 'Dealer', 'Accounts Executive'] },
     { id: 'dealer', label: 'Dealer Portal', icon: Landmark, roles: ['Admin', 'Dealer'] },
     { id: 'surveys', label: 'Site Surveys', icon: ClipboardList, roles: ['Admin', 'Site Survey Engineer'] },
     { id: 'quotes', label: 'Quotations & Invoices', icon: FileText, roles: ['Admin', 'Sales Manager', 'Sales Executive'] },
