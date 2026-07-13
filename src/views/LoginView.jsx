@@ -1,7 +1,7 @@
 // LoginView.jsx
 import React, { useState } from 'react';
 import { loginUserToServer } from '../db/mockDb';
-import { Mail, Lock } from 'lucide-react';
+import { User, Lock } from 'lucide-react';
 
 export default function LoginView({ onLoginSuccess }) {
   const [email, setEmail] = useState('');
@@ -46,13 +46,13 @@ export default function LoginView({ onLoginSuccess }) {
           )}
 
           <div className="login-input-group">
-            <label>Email or Username</label>
+            <label>Username</label>
             <div className="input-box">
-              <Mail size={16} className="input-icon" />
+              <User size={16} className="input-icon" />
               <input 
                 type="text" 
                 required 
-                placeholder="Email or Username"
+                placeholder="Username"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={loading}
