@@ -480,38 +480,21 @@ export default function LeadsView({ userRole, currentUser }) {
 
       // Date calculations
       const date = new Date();
-      const daySuffix = (d) => {
-        if (d > 3 && d < 21) return 'th';
-        switch (d % 10) {
-          case 1: return 'st';
-          case 2: return 'nd';
-          case 3: return 'rd';
-          default: return 'th';
-        }
-      };
-      const dayStr = `${date.getDate()}${daySuffix(date.getDate())}`;
+      const dayStr = date.getDate().toString(); // Removed suffix since template has 'thday'
       const monthStr = date.toLocaleString('en-US', { month: 'long' });
-      const yearStr = 'Six'; // Since the template has "Two Thousand Twenty", we write "Six" to make it "Two Thousand Twenty Six"
+      // Year is hardcoded as 'Twenty- six' in the new template, so we skip injecting it
 
       // Write Date on Page 1
       firstPage.drawText(dayStr, {
-        x: 270,
-        y: 596,
+        x: 250,
+        y: 601,
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
       });
       firstPage.drawText(monthStr, {
-        x: 382,
-        y: 596,
-        size: 10,
-        font: helveticaFont,
-        color: rgb(0, 0, 0),
-      });
-      // Date line 2: yearStr
-      firstPage.drawText(yearStr, {
-        x: 200,
-        y: 581,
+        x: 335,
+        y: 601,
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
@@ -659,8 +642,8 @@ export default function LeadsView({ userRole, currentUser }) {
 
       // Write Customer Name
       firstPage.drawText((lead.name || '').toUpperCase(), {
-        x: 44,
-        y: 494,
+        x: 95,
+        y: 514,
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
@@ -672,21 +655,23 @@ export default function LeadsView({ userRole, currentUser }) {
       const addrLine2 = addrLinesPage1.slice(1).join(' ') || '';
 
       firstPage.drawText(addrLine1.toUpperCase(), {
-        x: 264,
-        y: 494,
+        x: 320,
+        y: 514,
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
       });
       firstPage.drawText(addrLine2.toUpperCase(), {
-        x: 44,
-        y: 477,
+        x: 72,
+        y: 499,
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
       });
 
       // Format and Print Customer Name and Address inside the Page 4 box
+      // Erase leftover dummy address lines without hitting the left table border (X > 85)
+      fourthPage.drawRectangle({ x: 86, y: 315, width: 140, height: 60, color: rgb(1, 1, 1) });
       
       const addrLinesPage4 = getCleanAddressLines(lead, 38);
       const addr4Line1 = addrLinesPage4[0] || '';
