@@ -493,11 +493,6 @@ export default function LeadsView({ userRole, currentUser }) {
       const monthStr = date.toLocaleString('en-US', { month: 'long' });
       const yearStr = 'Six'; // Since the template has "Two Thousand Twenty", we write "Six" to make it "Two Thousand Twenty Six"
 
-      // Erase dummy text on Page 1
-      firstPage.drawRectangle({ x: 268, y: 595, width: 25, height: 14, color: rgb(1, 1, 1) }); // "16th"
-      firstPage.drawRectangle({ x: 382, y: 595, width: 40, height: 14, color: rgb(1, 1, 1) }); // "January"
-      firstPage.drawRectangle({ x: 198, y: 580, width: 20, height: 14, color: rgb(1, 1, 1) }); // "six"
-
       // Write Date on Page 1
       firstPage.drawText(dayStr, {
         x: 270,
@@ -662,10 +657,6 @@ export default function LeadsView({ userRole, currentUser }) {
         });
       };
 
-      // Erase dummy Customer Name and Address on Page 1
-      firstPage.drawRectangle({ x: 42, y: 492, width: 95, height: 14, color: rgb(1, 1, 1) }); // "Customer Name"
-      firstPage.drawRectangle({ x: 260, y: 492, width: 55, height: 14, color: rgb(1, 1, 1) }); // "address"
-
       // Write Customer Name
       firstPage.drawText((lead.name || '').toUpperCase(), {
         x: 44,
@@ -696,8 +687,6 @@ export default function LeadsView({ userRole, currentUser }) {
       });
 
       // Format and Print Customer Name and Address inside the Page 4 box
-      // First erase the dummy text block
-      fourthPage.drawRectangle({ x: 80, y: 320, width: 110, height: 75, color: rgb(1, 1, 1) });
       
       const addrLinesPage4 = getCleanAddressLines(lead, 38);
       const addr4Line1 = addrLinesPage4[0] || '';
