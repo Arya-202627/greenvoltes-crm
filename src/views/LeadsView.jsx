@@ -493,26 +493,30 @@ export default function LeadsView({ userRole, currentUser }) {
       const monthStr = date.toLocaleString('en-US', { month: 'long' });
       const yearStr = 'Six'; // Since the template has "Two Thousand Twenty", we write "Six" to make it "Two Thousand Twenty Six"
 
+      // Erase dummy text on Page 1
+      firstPage.drawRectangle({ x: 268, y: 595, width: 25, height: 14, color: rgb(1, 1, 1) }); // "16th"
+      firstPage.drawRectangle({ x: 382, y: 595, width: 40, height: 14, color: rgb(1, 1, 1) }); // "January"
+      firstPage.drawRectangle({ x: 198, y: 580, width: 20, height: 14, color: rgb(1, 1, 1) }); // "six"
+
       // Write Date on Page 1
-      // Date line 1: dayStr at X=272, Y=615. monthStr at X=362, Y=615
       firstPage.drawText(dayStr, {
-        x: 272,
-        y: 615,
+        x: 270,
+        y: 596,
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
       });
       firstPage.drawText(monthStr, {
-        x: 362,
-        y: 615,
+        x: 382,
+        y: 596,
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
       });
-      // Date line 2: yearStr at X=190, Y=595
+      // Date line 2: yearStr
       firstPage.drawText(yearStr, {
-        x: 190,
-        y: 595,
+        x: 200,
+        y: 581,
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
@@ -658,10 +662,14 @@ export default function LeadsView({ userRole, currentUser }) {
         });
       };
 
-      // Write Customer Name at X=80, Y=536
+      // Erase dummy Customer Name and Address on Page 1
+      firstPage.drawRectangle({ x: 42, y: 492, width: 95, height: 14, color: rgb(1, 1, 1) }); // "Customer Name"
+      firstPage.drawRectangle({ x: 260, y: 492, width: 55, height: 14, color: rgb(1, 1, 1) }); // "address"
+
+      // Write Customer Name
       firstPage.drawText((lead.name || '').toUpperCase(), {
-        x: 80,
-        y: 536,
+        x: 44,
+        y: 494,
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
@@ -673,21 +681,24 @@ export default function LeadsView({ userRole, currentUser }) {
       const addrLine2 = addrLinesPage1.slice(1).join(' ') || '';
 
       firstPage.drawText(addrLine1.toUpperCase(), {
-        x: 285,
-        y: 536,
+        x: 264,
+        y: 494,
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
       });
       firstPage.drawText(addrLine2.toUpperCase(), {
-        x: 80,
-        y: 519,
+        x: 44,
+        y: 477,
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
       });
 
       // Format and Print Customer Name and Address inside the Page 4 box
+      // First erase the dummy text block
+      fourthPage.drawRectangle({ x: 80, y: 320, width: 110, height: 75, color: rgb(1, 1, 1) });
+      
       const addrLinesPage4 = getCleanAddressLines(lead, 38);
       const addr4Line1 = addrLinesPage4[0] || '';
       const addr4Line2 = addrLinesPage4[1] || '';
@@ -695,7 +706,7 @@ export default function LeadsView({ userRole, currentUser }) {
 
       fourthPage.drawText((lead.name || '').toUpperCase(), {
         x: 85,
-        y: 334,
+        y: 383,
         size: 9,
         font: helveticaBoldFont,
         color: rgb(0, 0, 0),
@@ -703,7 +714,7 @@ export default function LeadsView({ userRole, currentUser }) {
       if (addr4Line1) {
         fourthPage.drawText(addr4Line1.toUpperCase(), {
           x: 85,
-          y: 318,
+          y: 365,
           size: 9,
           font: helveticaFont,
           color: rgb(0, 0, 0),
@@ -712,7 +723,7 @@ export default function LeadsView({ userRole, currentUser }) {
       if (addr4Line2) {
         fourthPage.drawText(addr4Line2.toUpperCase(), {
           x: 85,
-          y: 301,
+          y: 347,
           size: 9,
           font: helveticaFont,
           color: rgb(0, 0, 0),
@@ -721,7 +732,7 @@ export default function LeadsView({ userRole, currentUser }) {
       if (addr4Line3) {
         fourthPage.drawText(addr4Line3.toUpperCase(), {
           x: 85,
-          y: 285,
+          y: 329,
           size: 9,
           font: helveticaFont,
           color: rgb(0, 0, 0),
@@ -741,10 +752,10 @@ export default function LeadsView({ userRole, currentUser }) {
             const signatureBytes = Uint8Array.from(atob(signatureBase64), c => c.charCodeAt(0));
             const pngImage = await pdfDoc.embedPng(signatureBytes);
 
-            // Draw signature image above "Please Sign Above" (X=85, Y=382, W=80, H=30)
+            // Draw signature image above "Please Sign Above" (X=85, W=80, H=30)
             fourthPage.drawImage(pngImage, {
               x: 85,
-              y: 382,
+              y: 416,
               width: 80,
               height: 30,
             });
