@@ -461,6 +461,48 @@ export default function LeadsView({ userRole, currentUser }) {
     }
   };
 
+  // Helper function to wrap text by character count
+  const wrapText = (text, maxChars) => {
+    const words = (text || '').split(' ');
+    const lines = [];
+    let currentLine = '';
+    
+    words.forEach(word => {
+      if ((currentLine + ' ' + word).trim().length <= maxChars) {
+        currentLine = (currentLine + ' ' + word).trim();
+      } else {
+        if (currentLine) lines.push(currentLine);
+        currentLine = word;
+      }
+    });
+    if (currentLine) lines.push(currentLine);
+    return lines;
+  };
+
+  // Helper function to generate deduplicated address lines
+  const getCleanAddressLines = (lead, maxChars) => {
+    const addressStr = (lead.address || '').trim();
+    const districtStr = (lead.district || '').trim();
+    const pincodeStr = (lead.pincode || '').trim();
+    
+    let unified = addressStr;
+    
+    if (districtStr && !addressStr.toLowerCase().includes(districtStr.toLowerCase())) {
+      unified += `, ${districtStr}`;
+    }
+    
+    if (!addressStr.toLowerCase().includes('kerala')) {
+      unified += `, KERALA`;
+    }
+    
+    if (pincodeStr && !addressStr.includes(pincodeStr)) {
+      unified += `, PIN - ${pincodeStr}`;
+    }
+    
+    unified = unified.replace(/,+/g, ',').replace(/,\s*,/g, ',').replace(/,\s*$/, '').trim();
+    return wrapText(unified, maxChars);
+  };
+
   const generateQuote = async (lead, capacity) => {
     if (!lead) return;
     try {
@@ -554,48 +596,6 @@ export default function LeadsView({ userRole, currentUser }) {
         font: helveticaFont,
         color: rgb(0, 0, 0),
       });
-
-      // Helper function to wrap text by character count
-      const wrapText = (text, maxChars) => {
-        const words = text.split(' ');
-        const lines = [];
-        let currentLine = '';
-        
-        words.forEach(word => {
-          if ((currentLine + ' ' + word).trim().length <= maxChars) {
-            currentLine = (currentLine + ' ' + word).trim();
-          } else {
-            if (currentLine) lines.push(currentLine);
-            currentLine = word;
-          }
-        });
-        if (currentLine) lines.push(currentLine);
-        return lines;
-      };
-
-      // Helper function to generate deduplicated address lines
-      const getCleanAddressLines = (lead, maxChars) => {
-        const addressStr = (lead.address || '').trim();
-        const districtStr = (lead.district || '').trim();
-        const pincodeStr = (lead.pincode || '').trim();
-        
-        let unified = addressStr;
-        
-        if (districtStr && !addressStr.toLowerCase().includes(districtStr.toLowerCase())) {
-          unified += `, ${districtStr}`;
-        }
-        
-        if (!addressStr.toLowerCase().includes('kerala')) {
-          unified += `, KERALA`;
-        }
-        
-        if (pincodeStr && !addressStr.includes(pincodeStr)) {
-          unified += `, PIN - ${pincodeStr}`;
-        }
-        
-        unified = unified.replace(/,+/g, ',').replace(/,\s*,/g, ',').replace(/,\s*$/, '').trim();
-        return wrapText(unified, maxChars);
-      };
 
       // Helper function to make signature background transparent
       const makeSignatureTransparent = (dataUrl) => {
