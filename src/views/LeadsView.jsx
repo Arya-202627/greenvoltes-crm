@@ -461,6 +461,61 @@ export default function LeadsView({ userRole, currentUser }) {
     }
   };
 
+  const generateQuote = async (lead, capacity) => {
+    if (!lead) return;
+    try {
+      const templateName = capacity === 3 ? 'Quote_Template_3kW.pdf' : 'Quote_Template_5kW.pdf';
+      const response = await fetch(`/${templateName}`);
+      if (!response.ok) throw new Error(`Failed to fetch ${templateName}`);
+      const existingPdfBytes = await response.arrayBuffer();
+
+      const pdfDoc = await PDFDocument.load(existingPdfBytes);
+      const pages = pdfDoc.getPages();
+      const page1 = pages[0];
+      const page3 = pages[2];
+
+      const helveticaFont = await pdfDoc.embedFont('Helvetica');
+      const helveticaBoldFont = await pdfDoc.embedFont('Helvetica-Bold');
+
+      const date = new Date();
+      const dateStr = date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }); // 16/08/2026
+      const refNo = `GVES-${date.getFullYear()}-${(lead.id || '0000').substring(0, 4).toUpperCase()}`;
+
+      // --- PAGE 1 Modifications ---
+      // Erase dummy text
+      page1.drawRectangle({ x: 58, y: 140, width: 250, height: 35, color: rgb(9/255, 42/255, 73/255) });
+      page1.drawText((lead.name || '').toUpperCase(), { x: 60, y: 145, size: 24, font: helveticaBoldFont, color: rgb(1, 1, 1) });
+
+      page1.drawRectangle({ x: 110, y: 70, width: 95, height: 15, color: rgb(9/255, 42/255, 73/255) });
+      page1.drawText(refNo, { x: 114, y: 73, size: 8, font: helveticaBoldFont, color: rgb(1, 1, 1) });
+
+      page1.drawRectangle({ x: 208, y: 70, width: 60, height: 15, color: rgb(9/255, 42/255, 73/255) });
+      page1.drawText(dateStr, { x: 210, y: 73, size: 8, font: helveticaBoldFont, color: rgb(1, 1, 1) });
+
+      // --- PAGE 3 Modifications ---
+      page3.drawRectangle({ x: 58, y: 330, width: 200, height: 20, color: rgb(246/255, 248/255, 250/255) });
+      page3.drawText(lead.name || '', { x: 60, y: 332, size: 12, font: helveticaBoldFont, color: rgb(9/255, 42/255, 73/255) });
+
+      page3.drawRectangle({ x: 350, y: 330, width: 250, height: 20, color: rgb(246/255, 248/255, 250/255) });
+      const addrLines = getCleanAddressLines(lead, 40);
+      const locStr = addrLines.length > 0 ? addrLines.join(', ') : '';
+      page3.drawText(locStr, { x: 354, y: 332, size: 12, font: helveticaBoldFont, color: rgb(9/255, 42/255, 73/255) });
+
+      page3.drawRectangle({ x: 645, y: 247, width: 70, height: 18, color: rgb(246/255, 248/255, 250/255) });
+      page3.drawText(dateStr, { x: 648, y: 249, size: 12, font: helveticaBoldFont, color: rgb(9/255, 42/255, 73/255) });
+
+      const pdfBytes = await pdfDoc.save();
+      const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `Quote_${capacity}kW_${lead.name || 'Lead'}.pdf`;
+      link.click();
+    } catch (error) {
+      console.error('Error generating Quote PDF:', error);
+      alert('Error generating Quote PDF: ' + error.message);
+    }
+  };
+
   const generateVendorAgreement = async (lead) => {
     if (!lead) return;
     try {
@@ -1157,6 +1212,14 @@ export default function LeadsView({ userRole, currentUser }) {
               <div className="detail-section">
                 <h4>Generate Contracts & Reports</h4>
                 <p style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '8px' }}>Export official feasibility assessments and consumer-vendor agreements:</p>
+                <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+                  <button className="btn btn-primary btn-sm" onClick={() => generateQuote(activeLead, 3)} style={{ flex: 1, backgroundColor: '#092a49', borderColor: '#092a49' }}>
+                    <FileText size={12} /> Quote (3kW)
+                  </button>
+                  <button className="btn btn-primary btn-sm" onClick={() => generateQuote(activeLead, 5)} style={{ flex: 1, backgroundColor: '#092a49', borderColor: '#092a49' }}>
+                    <FileText size={12} /> Quote (5kW)
+                  </button>
+                </div>
                 <div style={{ display: 'flex', gap: '10px' }}>
                   <button className="btn btn-primary btn-sm" onClick={() => generateVendorFeasibility(activeLead)} style={{ flex: 1 }}>
                     <FileText size={12} /> Feasibility Report
