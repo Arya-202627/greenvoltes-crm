@@ -481,9 +481,11 @@ export default function LeadsView({ userRole, currentUser }) {
 
   // Helper function to generate deduplicated address lines
   const getCleanAddressLines = (lead, maxChars) => {
-    const addressStr = (lead.address || '').trim();
+    // Clean up newlines and extra spaces
+    let addressStr = (lead.address || '').trim().replace(/[\r\n]+/g, ', ');
     const districtStr = (lead.district || '').trim();
-    const pincodeStr = (lead.pincode || '').trim();
+    // Ensure pincode is only numbers to prevent "PIN -, 123"
+    const pincodeStr = (lead.pincode || '').replace(/[^0-9]/g, '');
     
     let unified = addressStr;
     
@@ -499,7 +501,13 @@ export default function LeadsView({ userRole, currentUser }) {
       unified += `, PIN - ${pincodeStr}`;
     }
     
-    unified = unified.replace(/,+/g, ',').replace(/,\s*,/g, ',').replace(/,\s*$/, '').trim();
+    // Fix weird spacing like " ,", ",,", etc.
+    unified = unified.replace(/\s+,/g, ',')
+                     .replace(/,+/g, ',')
+                     .replace(/,\s*,/g, ',')
+                     .replace(/,\s*$/, '')
+                     .trim();
+                     
     return wrapText(unified, maxChars);
   };
 
@@ -535,13 +543,20 @@ export default function LeadsView({ userRole, currentUser }) {
       page1.drawText(dateStr, { x: 210, y: 73, size: 8, font: helveticaBoldFont, color: rgb(1, 1, 1) });
 
       // --- PAGE 3 Modifications ---
-      page3.drawRectangle({ x: 58, y: 330, width: 200, height: 20, color: rgb(246/255, 248/255, 250/255) });
+      page3.drawRectangle({ x: 58, y: 325, width: 200, height: 25, color: rgb(246/255, 248/255, 250/255) });
       page3.drawText(lead.name || '', { x: 60, y: 332, size: 12, font: helveticaBoldFont, color: rgb(9/255, 42/255, 73/255) });
 
-      page3.drawRectangle({ x: 350, y: 330, width: 250, height: 20, color: rgb(246/255, 248/255, 250/255) });
-      const addrLines = getCleanAddressLines(lead, 40);
-      const locStr = addrLines.length > 0 ? addrLines.join(', ') : '';
-      page3.drawText(locStr, { x: 354, y: 332, size: 12, font: helveticaBoldFont, color: rgb(9/255, 42/255, 73/255) });
+      page3.drawRectangle({ x: 350, y: 320, width: 250, height: 30, color: rgb(246/255, 248/255, 250/255) });
+      const addrLines = getCleanAddressLines(lead, 42);
+      const locLine1 = addrLines[0] || '';
+      const locLine2 = addrLines.slice(1).join(' ') || '';
+      
+      if (locLine2) {
+        page3.drawText(locLine1, { x: 354, y: 338, size: 11, font: helveticaBoldFont, color: rgb(9/255, 42/255, 73/255) });
+        page3.drawText(locLine2.substring(0, 45), { x: 354, y: 324, size: 11, font: helveticaBoldFont, color: rgb(9/255, 42/255, 73/255) });
+      } else {
+        page3.drawText(locLine1, { x: 354, y: 332, size: 11, font: helveticaBoldFont, color: rgb(9/255, 42/255, 73/255) });
+      }
 
       page3.drawRectangle({ x: 645, y: 247, width: 70, height: 18, color: rgb(246/255, 248/255, 250/255) });
       page3.drawText(dateStr, { x: 648, y: 249, size: 12, font: helveticaBoldFont, color: rgb(9/255, 42/255, 73/255) });
