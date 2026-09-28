@@ -598,16 +598,16 @@ export default function LeadsView({ userRole, currentUser }) {
 
       // Write Date on Page 1
       firstPage.drawText(dayStr, {
-        x: 268,
+        x: 264,
         y: 603,
-        size: 10,
+        size: 9,
         font: helveticaFont,
         color: rgb(0, 0, 0),
       });
       firstPage.drawText(monthStr, {
-        x: 315,
+        x: 322,
         y: 603,
-        size: 10,
+        size: 8,
         font: helveticaFont,
         color: rgb(0, 0, 0),
       });
