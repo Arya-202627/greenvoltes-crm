@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   getLeads, saveLead, deleteLead, logNotification, uploadFileToServer, getUploadUrl, getDb, saveDb
 } from '../db/mockDb';
-import { PDFDocument, rgb } from 'pdf-lib';
+import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import Modal from '../components/Modal';
 import { 
   Search, Plus, FileText, CheckCircle2, ChevronRight, Edit3, Trash2,
@@ -596,8 +596,7 @@ export default function LeadsView({ userRole, currentUser }) {
       const monthStr = date.toLocaleString('en-US', { month: 'long' });
       // Year is hardcoded as 'Twenty- six' in the new template, so we skip injecting it
 
-      // Use abbreviated month to fit in the very small blank line on the template
-      const shortMonthStr = date.toLocaleString('en-US', { month: 'short' });
+      const timesFont = await pdfDoc.embedFont(StandardFonts.TimesRoman);
 
       // Write Date on Page 1
       firstPage.drawText(dayStr, {
@@ -607,11 +606,23 @@ export default function LeadsView({ userRole, currentUser }) {
         font: helveticaFont,
         color: rgb(0, 0, 0),
       });
-      firstPage.drawText(shortMonthStr, {
-        x: 336,
+
+      // Erase the original "of ________ month Two Thousand Twenty-" part 
+      // because the physical blank is too small for full month names like September.
+      firstPage.drawRectangle({
+        x: 300,
+        y: 595,
+        width: 260,
+        height: 14,
+        color: rgb(1, 1, 1),
+      });
+
+      // Rewrite the erased part with proper spacing using Times Roman to match template
+      firstPage.drawText(`of ${monthStr} month Two Thousand Twenty-`, {
+        x: 305,
         y: 603,
-        size: 10,
-        font: helveticaFont,
+        size: 11,
+        font: timesFont,
         color: rgb(0, 0, 0),
       });
 
