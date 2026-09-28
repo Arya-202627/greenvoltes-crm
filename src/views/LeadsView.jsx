@@ -601,7 +601,7 @@ export default function LeadsView({ userRole, currentUser }) {
       // Erase everything after "on " to completely control the date formatting
       // This safely erases "_____ thday of ________ month Two Thousand Twenty-"
       firstPage.drawRectangle({
-        x: 255,
+        x: 273,
         y: 597,
         width: 320,
         height: 18,
@@ -611,7 +611,7 @@ export default function LeadsView({ userRole, currentUser }) {
       // Rewrite the entire date string perfectly formatted with Times Roman
       // This fixes the typo "thday" to "th day" and accommodates any month length flawlessly.
       firstPage.drawText(`${dayStr}th day of ${monthStr} month Two Thousand Twenty-`, {
-        x: 260,
+        x: 277,
         y: 603,
         size: 11,
         font: timesFont,
