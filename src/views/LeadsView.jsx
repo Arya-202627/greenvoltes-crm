@@ -598,30 +598,20 @@ export default function LeadsView({ userRole, currentUser }) {
 
       const timesFont = await pdfDoc.embedFont(StandardFonts.TimesRoman);
 
-      // Write Date on Page 1
-      firstPage.drawText(dayStr, {
-        x: 270,
-        y: 603,
-        size: 10,
-        font: helveticaFont,
-        color: rgb(0, 0, 0),
-      });
-
-      // Erase the original "of ________ month Two Thousand Twenty-" part 
-      // with a box carefully sized to hide ghost text but NOT touch the line below.
-      // Started at 305 to avoid chopping off the word 'thday' which ends around 300.
+      // Erase everything after "on " to completely control the date formatting
+      // This safely erases "_____ thday of ________ month Two Thousand Twenty-"
       firstPage.drawRectangle({
-        x: 305,
+        x: 255,
         y: 597,
-        width: 270,
+        width: 320,
         height: 18,
         color: rgb(1, 1, 1),
       });
 
-      // Rewrite the erased part with proper spacing using Times Roman to match template
-      // Increased size to 11 to match the original template text size better.
-      firstPage.drawText(`of ${monthStr} month Two Thousand Twenty-`, {
-        x: 310,
+      // Rewrite the entire date string perfectly formatted with Times Roman
+      // This fixes the typo "thday" to "th day" and accommodates any month length flawlessly.
+      firstPage.drawText(`${dayStr}th day of ${monthStr} month Two Thousand Twenty-`, {
+        x: 260,
         y: 603,
         size: 11,
         font: timesFont,
