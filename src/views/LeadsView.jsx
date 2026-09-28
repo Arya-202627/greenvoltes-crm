@@ -598,15 +598,15 @@ export default function LeadsView({ userRole, currentUser }) {
 
       // Write Date on Page 1
       firstPage.drawText(dayStr, {
-        x: 258,
-        y: 598,
+        x: 254,
+        y: 602,
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
       });
       firstPage.drawText(monthStr, {
-        x: 345,
-        y: 598,
+        x: 340,
+        y: 602,
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
@@ -712,8 +712,8 @@ export default function LeadsView({ userRole, currentUser }) {
 
       // Write Customer Name
       firstPage.drawText((lead.name || '').toUpperCase(), {
-        x: 105,
-        y: 517,
+        x: 100,
+        y: 521,
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
@@ -725,15 +725,15 @@ export default function LeadsView({ userRole, currentUser }) {
       const addrLine2 = addrLinesPage1.slice(1).join(' ') || '';
 
       firstPage.drawText(addrLine1.toUpperCase(), {
-        x: 325,
-        y: 517,
+        x: 320,
+        y: 521,
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
       });
       firstPage.drawText(addrLine2.toUpperCase(), {
         x: 72,
-        y: 497,
+        y: 501,
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
