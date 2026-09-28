@@ -596,6 +596,9 @@ export default function LeadsView({ userRole, currentUser }) {
       const monthStr = date.toLocaleString('en-US', { month: 'long' });
       // Year is hardcoded as 'Twenty- six' in the new template, so we skip injecting it
 
+      // Use abbreviated month to fit in the very small blank line on the template
+      const shortMonthStr = date.toLocaleString('en-US', { month: 'short' });
+
       // Write Date on Page 1
       firstPage.drawText(dayStr, {
         x: 270,
@@ -604,8 +607,8 @@ export default function LeadsView({ userRole, currentUser }) {
         font: helveticaFont,
         color: rgb(0, 0, 0),
       });
-      firstPage.drawText(monthStr, {
-        x: 318,
+      firstPage.drawText(shortMonthStr, {
+        x: 336,
         y: 603,
         size: 10,
         font: helveticaFont,
