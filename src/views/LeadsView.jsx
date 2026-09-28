@@ -605,7 +605,7 @@ export default function LeadsView({ userRole, currentUser }) {
         color: rgb(0, 0, 0),
       });
       firstPage.drawText(monthStr, {
-        x: 332,
+        x: 318,
         y: 603,
         size: 10,
         font: helveticaFont,
