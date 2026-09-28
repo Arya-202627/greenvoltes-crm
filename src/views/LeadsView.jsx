@@ -608,12 +608,12 @@ export default function LeadsView({ userRole, currentUser }) {
       });
 
       // Erase the original "of ________ month Two Thousand Twenty-" part 
-      // with a larger box to completely hide all ghost text (ascenders/descenders).
+      // with a box carefully sized to hide ghost text but NOT touch the line below.
       firstPage.drawRectangle({
         x: 290,
-        y: 590,
+        y: 597,
         width: 280,
-        height: 25,
+        height: 18,
         color: rgb(1, 1, 1),
       });
 
