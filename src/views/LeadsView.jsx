@@ -608,20 +608,20 @@ export default function LeadsView({ userRole, currentUser }) {
       });
 
       // Erase the original "of ________ month Two Thousand Twenty-" part 
-      // because the physical blank is too small for full month names like September.
+      // with a larger box to completely hide all ghost text (ascenders/descenders).
       firstPage.drawRectangle({
-        x: 300,
-        y: 595,
-        width: 260,
-        height: 14,
+        x: 290,
+        y: 590,
+        width: 280,
+        height: 25,
         color: rgb(1, 1, 1),
       });
 
       // Rewrite the erased part with proper spacing using Times Roman to match template
       firstPage.drawText(`of ${monthStr} month Two Thousand Twenty-`, {
-        x: 305,
+        x: 295,
         y: 603,
-        size: 11,
+        size: 10,
         font: timesFont,
         color: rgb(0, 0, 0),
       });
