@@ -609,19 +609,21 @@ export default function LeadsView({ userRole, currentUser }) {
 
       // Erase the original "of ________ month Two Thousand Twenty-" part 
       // with a box carefully sized to hide ghost text but NOT touch the line below.
+      // Started at 305 to avoid chopping off the word 'thday' which ends around 300.
       firstPage.drawRectangle({
-        x: 290,
+        x: 305,
         y: 597,
-        width: 280,
+        width: 270,
         height: 18,
         color: rgb(1, 1, 1),
       });
 
       // Rewrite the erased part with proper spacing using Times Roman to match template
+      // Increased size to 11 to match the original template text size better.
       firstPage.drawText(`of ${monthStr} month Two Thousand Twenty-`, {
-        x: 295,
+        x: 310,
         y: 603,
-        size: 10,
+        size: 11,
         font: timesFont,
         color: rgb(0, 0, 0),
       });
