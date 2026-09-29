@@ -283,16 +283,16 @@ export default function LeadsView({ userRole, currentUser }) {
 
       // The new template has a clean background for the top half.
       // But it has pre-printed "3 KW" and "(Proforma Invoice...)" in the bottom half.
-      firstPage.drawRectangle({ x: 335, y: 272, width: 100, height: 25, color: rgb(1, 1, 1) }); // Erase pre-printed 3 KW
-      firstPage.drawRectangle({ x: 335, y: 246, width: 100, height: 25, color: rgb(1, 1, 1) }); // Erase pre-printed 3 KW
-      firstPage.drawRectangle({ x: 335, y: 170, width: 250, height: 30, color: rgb(1, 1, 1) }); // Erase Proforma Invoice text
+      firstPage.drawRectangle({ x: 315, y: 272, width: 120, height: 25, color: rgb(1, 1, 1) }); // Erase pre-printed 3 KW
+      firstPage.drawRectangle({ x: 315, y: 246, width: 120, height: 25, color: rgb(1, 1, 1) }); // Erase pre-printed 3 KW
+      firstPage.drawRectangle({ x: 315, y: 170, width: 250, height: 30, color: rgb(1, 1, 1) }); // Erase Proforma Invoice text
 
       // Embed Helvetica font
       const helveticaFont = await pdfDoc.embedFont('Helvetica');
 
-      // Draw new text values at the precise grid positions after the colons (X=345 perfectly aligns with pre-printed text)
+      // Draw new text values at the precise grid positions after the colons (X=320 perfectly aligns with pre-printed text)
       firstPage.drawText(lead.name || '', {
-        x: 345,
+        x: 320,
         y: 741, // #1 Name
         size: 10,
         font: helveticaFont,
@@ -300,7 +300,7 @@ export default function LeadsView({ userRole, currentUser }) {
       });
 
       firstPage.drawText(lead.consumerNumber || lead.id || '1234567890123', {
-        x: 345,
+        x: 320,
         y: 715, // #2 Consumer ID
         size: 10,
         font: helveticaFont,
@@ -322,7 +322,7 @@ export default function LeadsView({ userRole, currentUser }) {
       };
 
       firstPage.drawText(cleanAddressFeasibility(lead.address), {
-        x: 345,
+        x: 320,
         y: 611, // #6 Address
         size: 10,
         font: helveticaFont,
@@ -330,7 +330,7 @@ export default function LeadsView({ userRole, currentUser }) {
       });
 
       firstPage.drawText((lead.district || '').toUpperCase(), {
-        x: 345,
+        x: 320,
         y: 559, // #7 District (Shifted down because Address has 2 lines)
         size: 10,
         font: helveticaFont,
@@ -338,7 +338,7 @@ export default function LeadsView({ userRole, currentUser }) {
       });
 
       firstPage.drawText(lead.pincode || '', {
-        x: 345,
+        x: 320,
         y: 507, // #9 Pincode
         size: 10,
         font: helveticaFont,
@@ -346,7 +346,7 @@ export default function LeadsView({ userRole, currentUser }) {
       });
 
       firstPage.drawText((lead.sbiBranch || 'N/A').toUpperCase(), {
-        x: 395, // Shifted further right to avoid colliding with the long prompt "sought:"
+        x: 380, // Shifted further right to avoid colliding with the long prompt "sought:", but not too far
         y: 481, // #10 SBI Branch
         size: 10,
         font: helveticaFont,
@@ -367,7 +367,7 @@ export default function LeadsView({ userRole, currentUser }) {
       const projectCostVal = lead.projectCost !== undefined ? lead.projectCost : '2,25,000/-';
 
       firstPage.drawText(janSamarthId, {
-        x: 345,
+        x: 320,
         y: 637, // #5 Jan Samarth
         size: 10,
         font: helveticaFont,
@@ -375,7 +375,7 @@ export default function LeadsView({ userRole, currentUser }) {
       });
 
       firstPage.drawText(appliedCapacity, {
-        x: 345,
+        x: 320,
         y: 281, // #15 Applied Capacity
         size: 10,
         font: helveticaFont,
@@ -383,7 +383,7 @@ export default function LeadsView({ userRole, currentUser }) {
       });
 
       firstPage.drawText(installedCapacity, {
-        x: 345,
+        x: 320,
         y: 255, // #16 Installed Capacity
         size: 10,
         font: helveticaFont,
@@ -391,7 +391,7 @@ export default function LeadsView({ userRole, currentUser }) {
       });
 
       firstPage.drawText(projectCostVal, {
-        x: 345,
+        x: 320,
         y: 182, // #18 Project Cost
         size: 10,
         font: helveticaFont,
