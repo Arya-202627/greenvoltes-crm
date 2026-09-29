@@ -281,108 +281,45 @@ export default function LeadsView({ userRole, currentUser }) {
       const pages = pdfDoc.getPages();
       const firstPage = pages[0];
 
-      // Draw white rectangles to cover previous text
-      // Name coordinates (bottom-left origin): X=304, Y=672, W=250, H=16
-      firstPage.drawRectangle({
-        x: 304,
-        y: 672,
-        width: 250,
-        height: 16,
-        color: rgb(1, 1, 1),
-      });
-      // Consumer ID coordinates: X=304, Y=647, W=250, H=16
-      firstPage.drawRectangle({
-        x: 304,
-        y: 647,
-        width: 250,
-        height: 16,
-        color: rgb(1, 1, 1),
-      });
-      // Address coordinates: X=304, Y=542, W=250, H=16
-      firstPage.drawRectangle({
-        x: 304,
-        y: 542,
-        width: 250,
-        height: 16,
-        color: rgb(1, 1, 1),
-      });
-      // District coordinates: X=304, Y=513, W=250, H=16
-      firstPage.drawRectangle({
-        x: 304,
-        y: 513,
-        width: 250,
-        height: 16,
-        color: rgb(1, 1, 1),
-      });
-      // Pincode coordinates: X=304, Y=464, W=250, H=16
-      firstPage.drawRectangle({
-        x: 304,
-        y: 464,
-        width: 250,
-        height: 16,
-        color: rgb(1, 1, 1),
-      });
+      // Draw white rectangles to cover previous dummy text on the NEW template
+      // Target area: X=340 to X=580 to cover the fields after the colons
 
-      // Jan Samarth ID coordinates: X=304, Y=564, W=250, H=16
-      firstPage.drawRectangle({
-        x: 304,
-        y: 564,
-        width: 250,
-        height: 16,
-        color: rgb(1, 1, 1),
-      });
+      // Cover #1 Name and #2 Consumer ID (just in case)
+      firstPage.drawRectangle({ x: 340, y: 700, width: 250, height: 50, color: rgb(1, 1, 1) });
+      
+      // Cover #4 Portal ID and #5 Jan Samarth (wipes dummy ARFFG and 15156161711818)
+      firstPage.drawRectangle({ x: 340, y: 640, width: 250, height: 45, color: rgb(1, 1, 1) });
+      
+      // Cover #6 Address (wipes dummy 3-line address: KANJANAPPILLY...)
+      firstPage.drawRectangle({ x: 340, y: 580, width: 250, height: 50, color: rgb(1, 1, 1) });
+      
+      // Cover #7 District (wipes dummy ERNAKULAM)
+      firstPage.drawRectangle({ x: 340, y: 560, width: 250, height: 18, color: rgb(1, 1, 1) });
+      
+      // Cover #9 Pincode (wipes dummy 682307)
+      firstPage.drawRectangle({ x: 340, y: 505, width: 250, height: 20, color: rgb(1, 1, 1) });
 
-      // RTS Applied coordinates: X=304, Y=307, W=100, H=18
-      firstPage.drawRectangle({
-        x: 304,
-        y: 307,
-        width: 100,
-        height: 18,
-        color: rgb(1, 1, 1),
-      });
+      // Cover #15 Applied and #16 Installed Capacity
+      firstPage.drawRectangle({ x: 340, y: 240, width: 250, height: 60, color: rgb(1, 1, 1) });
 
-      // RTS Installed coordinates: X=304, Y=277, W=100, H=18
-      firstPage.drawRectangle({
-        x: 304,
-        y: 277,
-        width: 100,
-        height: 18,
-        color: rgb(1, 1, 1),
-      });
-
-      // Cover stray pre-printed 2,25,000/- at Point 17: X=304, Y=220, W=150, H=18
-      firstPage.drawRectangle({
-        x: 304,
-        y: 220,
-        width: 150,
-        height: 18,
-        color: rgb(1, 1, 1),
-      });
-
-      // Project Cost coordinates: X=304, Y=160, W=150, H=18
-      firstPage.drawRectangle({
-        x: 304,
-        y: 160,
-        width: 150,
-        height: 18,
-        color: rgb(1, 1, 1),
-      });
+      // Cover Project Cost
+      firstPage.drawRectangle({ x: 340, y: 150, width: 250, height: 25, color: rgb(1, 1, 1) });
 
       // Embed Helvetica font
       const helveticaFont = await pdfDoc.embedFont('Helvetica');
 
       // Draw new text values
       firstPage.drawText(lead.name || '', {
-        x: 306,
-        y: 675,
+        x: 345,
+        y: 755,
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
       });
 
       firstPage.drawText(lead.consumerNumber || lead.id || '1234567890123', {
-        x: 306,
-        y: 650,
+        x: 345,
+        y: 728,
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
@@ -403,24 +340,24 @@ export default function LeadsView({ userRole, currentUser }) {
       };
 
       firstPage.drawText(cleanAddressFeasibility(lead.address), {
-        x: 306,
-        y: 544,
+        x: 345,
+        y: 624,
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
       });
 
       firstPage.drawText((lead.district || '').toUpperCase(), {
-        x: 306,
-        y: 517,
+        x: 345,
+        y: 571,
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
       });
 
       firstPage.drawText(lead.pincode || '', {
-        x: 308,
-        y: 468,
+        x: 345,
+        y: 517,
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
@@ -440,32 +377,32 @@ export default function LeadsView({ userRole, currentUser }) {
       const projectCostVal = lead.projectCost !== undefined ? lead.projectCost : '2,25,000/-';
 
       firstPage.drawText(janSamarthId, {
-        x: 306,
-        y: 569,
+        x: 345,
+        y: 650,
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
       });
 
       firstPage.drawText(appliedCapacity, {
-        x: 306,
-        y: 315,
-        size: 10,
-        font: helveticaFont,
-        color: rgb(0, 0, 0),
-      });
-
-      firstPage.drawText(installedCapacity, {
-        x: 306,
+        x: 345,
         y: 285,
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
       });
 
+      firstPage.drawText(installedCapacity, {
+        x: 345,
+        y: 255,
+        size: 10,
+        font: helveticaFont,
+        color: rgb(0, 0, 0),
+      });
+
       firstPage.drawText(projectCostVal, {
-        x: 306,
-        y: 165,
+        x: 345,
+        y: 160,
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
