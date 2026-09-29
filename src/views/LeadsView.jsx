@@ -346,7 +346,7 @@ export default function LeadsView({ userRole, currentUser }) {
       });
 
       firstPage.drawText((lead.sbiBranch || 'N/A').toUpperCase(), {
-        x: 380, // Shifted further right to avoid colliding with the long prompt "sought:", but not too far
+        x: 395, // Shifted further right to give proper spacing after the colon
         y: 481, // #10 SBI Branch
         size: 10,
         font: helveticaFont,
