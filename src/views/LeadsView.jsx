@@ -54,6 +54,7 @@ export default function LeadsView({ userRole, currentUser }) {
   
   // Modals state
   const [isNewLeadOpen, setIsNewLeadOpen] = useState(false);
+  const [editingLeadId, setEditingLeadId] = useState(null);
   const [activeLead, setActiveLead] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(null); // { docKey, percent }
   const [viewingFileUrl, setViewingFileUrl] = useState(null);
@@ -105,6 +106,24 @@ export default function LeadsView({ userRole, currentUser }) {
 
   const handleCreateLead = (e) => {
     e.preventDefault();
+
+    if (editingLeadId) {
+      const updated = { ...newLead };
+      saveLead(updated);
+      setIsNewLeadOpen(false);
+      setEditingLeadId(null);
+      setNewLead({
+        name: '', age: '', gender: 'Male', mobile: '', alternateMobile: '',
+        email: '', address: '', district: 'Thiruvananthapuram', state: 'Kerala',
+        pincode: '', source: 'Website', status: 'New Lead', notes: ''
+      });
+      refreshLeads();
+      if (activeLead && activeLead.id === updated.id) {
+        setActiveLead(updated);
+      }
+      return;
+    }
+
     const rawLeads = getLeads();
     const leadId = 'L' + (rawLeads.length + 101);
     const leadData = {
@@ -153,6 +172,12 @@ export default function LeadsView({ userRole, currentUser }) {
       pincode: '', source: 'Website', status: 'New Lead', notes: ''
     });
     refreshLeads();
+  };
+
+  const handleEditLead = (lead) => {
+    setNewLead({ ...lead });
+    setEditingLeadId(lead.id);
+    setIsNewLeadOpen(true);
   };
 
   const handleUpdateStatus = (lead, nextStatus) => {
@@ -965,7 +990,15 @@ export default function LeadsView({ userRole, currentUser }) {
           <h2 className="view-title"><UserPlus className="view-icon-color" /> Customer CRM</h2>
           <p className="view-subtitle">Monitor inquiries, schedule site surveys, compile KSEB applications, and store KYC files.</p>
         </div>
-        <button className="btn btn-primary" onClick={() => setIsNewLeadOpen(true)}>
+        <button className="btn btn-primary" onClick={() => {
+          setEditingLeadId(null);
+          setNewLead({
+            name: '', age: '', gender: 'Male', mobile: '', alternateMobile: '',
+            email: '', address: '', district: 'Thiruvananthapuram', state: 'Kerala',
+            pincode: '', source: 'Website', status: 'New Lead', notes: ''
+          });
+          setIsNewLeadOpen(true);
+        }}>
           <Plus size={16} /> Add Customer
         </button>
       </div>
@@ -1044,6 +1077,9 @@ export default function LeadsView({ userRole, currentUser }) {
                       <div className="action-buttons" onClick={(e) => e.stopPropagation()}>
                         <button className="icon-btn" onClick={() => setActiveLead(lead)} title="View Detail">
                           <ChevronRight size={16} />
+                        </button>
+                        <button className="icon-btn" onClick={() => handleEditLead(lead)} title="Edit">
+                          <Edit3 size={14} />
                         </button>
                         <button className="icon-btn text-danger-hover" onClick={() => handleDelete(lead.id)} title="Delete">
                           <Trash2 size={14} />
@@ -1256,7 +1292,7 @@ export default function LeadsView({ userRole, currentUser }) {
       </div>
 
       {/* New Lead Modal */}
-      <Modal isOpen={isNewLeadOpen} onClose={() => setIsNewLeadOpen(false)} title="Register New Customer">
+      <Modal isOpen={isNewLeadOpen} onClose={() => setIsNewLeadOpen(false)} title={editingLeadId ? "Edit Customer" : "Register New Customer"}>
         <form onSubmit={handleCreateLead} className="new-lead-form">
           <div className="form-row">
             <div className="form-group">
@@ -1422,7 +1458,7 @@ export default function LeadsView({ userRole, currentUser }) {
               Cancel
             </button>
             <button type="submit" className="btn btn-primary">
-              Register Customer
+              {editingLeadId ? "Update Customer" : "Register Customer"}
             </button>
           </div>
         </form>
