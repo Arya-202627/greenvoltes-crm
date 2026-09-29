@@ -281,24 +281,27 @@ export default function LeadsView({ userRole, currentUser }) {
       const pages = pdfDoc.getPages();
       const firstPage = pages[0];
 
-      // The template is now clean, so we don't need to erase any dummy data.
-      // We will just draw the text directly on the grid.
+      // The new template has a clean background for the top half.
+      // But it has pre-printed "3 KW" and "(Proforma Invoice...)" in the bottom half.
+      firstPage.drawRectangle({ x: 350, y: 276, width: 100, height: 20, color: rgb(1, 1, 1) }); // Erase pre-printed 3 KW
+      firstPage.drawRectangle({ x: 350, y: 250, width: 100, height: 20, color: rgb(1, 1, 1) }); // Erase pre-printed 3 KW
+      firstPage.drawRectangle({ x: 350, y: 172, width: 200, height: 20, color: rgb(1, 1, 1) }); // Erase Proforma Invoice text
 
       // Embed Helvetica font
       const helveticaFont = await pdfDoc.embedFont('Helvetica');
 
-      // Draw new text values
+      // Draw new text values at the precise grid positions after the colons (X=355)
       firstPage.drawText(lead.name || '', {
-        x: 280,
-        y: 728, // #1 Name
+        x: 355,
+        y: 741, // #1 Name
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
       });
 
       firstPage.drawText(lead.consumerNumber || lead.id || '1234567890123', {
-        x: 280,
-        y: 702, // #2 Consumer ID
+        x: 355,
+        y: 715, // #2 Consumer ID
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
@@ -319,24 +322,24 @@ export default function LeadsView({ userRole, currentUser }) {
       };
 
       firstPage.drawText(cleanAddressFeasibility(lead.address), {
-        x: 280,
-        y: 598, // #6 Address
+        x: 355,
+        y: 611, // #6 Address
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
       });
 
       firstPage.drawText((lead.district || '').toUpperCase(), {
-        x: 280,
-        y: 572, // #7 District
+        x: 355,
+        y: 585, // #7 District
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
       });
 
       firstPage.drawText(lead.pincode || '', {
-        x: 280,
-        y: 520, // #9 Pincode
+        x: 355,
+        y: 533, // #9 Pincode
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
@@ -356,15 +359,15 @@ export default function LeadsView({ userRole, currentUser }) {
       const projectCostVal = lead.projectCost !== undefined ? lead.projectCost : '2,25,000/-';
 
       firstPage.drawText(janSamarthId, {
-        x: 280,
-        y: 624, // #5 Jan Samarth
+        x: 355,
+        y: 637, // #5 Jan Samarth
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
       });
 
       firstPage.drawText(appliedCapacity, {
-        x: 280,
+        x: 355,
         y: 286, // #15 Applied Capacity
         size: 10,
         font: helveticaFont,
@@ -372,7 +375,7 @@ export default function LeadsView({ userRole, currentUser }) {
       });
 
       firstPage.drawText(installedCapacity, {
-        x: 280,
+        x: 355,
         y: 260, // #16 Installed Capacity
         size: 10,
         font: helveticaFont,
@@ -380,7 +383,7 @@ export default function LeadsView({ userRole, currentUser }) {
       });
 
       firstPage.drawText(projectCostVal, {
-        x: 280,
+        x: 355,
         y: 182, // #18 Project Cost
         size: 10,
         font: helveticaFont,
