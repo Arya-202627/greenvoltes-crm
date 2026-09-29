@@ -331,7 +331,7 @@ export default function LeadsView({ userRole, currentUser }) {
 
       firstPage.drawText((lead.district || '').toUpperCase(), {
         x: 355,
-        y: 585, // #7 District
+        y: 559, // #7 District (Shifted down because Address has 2 lines)
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
@@ -339,7 +339,15 @@ export default function LeadsView({ userRole, currentUser }) {
 
       firstPage.drawText(lead.pincode || '', {
         x: 355,
-        y: 533, // #9 Pincode
+        y: 507, // #9 Pincode
+        size: 10,
+        font: helveticaFont,
+        color: rgb(0, 0, 0),
+      });
+
+      firstPage.drawText((lead.sbiBranch || 'N/A').toUpperCase(), {
+        x: 355,
+        y: 481, // #10 SBI Branch
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
@@ -368,7 +376,7 @@ export default function LeadsView({ userRole, currentUser }) {
 
       firstPage.drawText(appliedCapacity, {
         x: 355,
-        y: 286, // #15 Applied Capacity
+        y: 281, // #15 Applied Capacity
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
@@ -376,7 +384,7 @@ export default function LeadsView({ userRole, currentUser }) {
 
       firstPage.drawText(installedCapacity, {
         x: 355,
-        y: 260, // #16 Installed Capacity
+        y: 255, // #16 Installed Capacity
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
@@ -1179,6 +1187,28 @@ export default function LeadsView({ userRole, currentUser }) {
                       value={activeLead.projectCost !== undefined ? activeLead.projectCost : '2,25,000/-'} 
                       placeholder="e.g. 2,25,000/-"
                       onChange={(e) => handleUpdateCustomField('projectCost', e.target.value)}
+                    />
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ fontWeight: '500', minWidth: '130px' }}>District:</span>
+                    <input 
+                      type="text" 
+                      className="form-control" 
+                      style={{ flex: 1, padding: '3px 6px', fontSize: '12px', height: 'auto' }}
+                      value={activeLead.district || ''} 
+                      placeholder="e.g. ERNAKULAM"
+                      onChange={(e) => handleUpdateCustomField('district', e.target.value)}
+                    />
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ fontWeight: '500', minWidth: '130px' }}>SBI Branch Name:</span>
+                    <input 
+                      type="text" 
+                      className="form-control" 
+                      style={{ flex: 1, padding: '3px 6px', fontSize: '12px', height: 'auto' }}
+                      value={activeLead.sbiBranch || ''} 
+                      placeholder="e.g. ARTHIKAL"
+                      onChange={(e) => handleUpdateCustomField('sbiBranch', e.target.value)}
                     />
                   </div>
                 </div>
