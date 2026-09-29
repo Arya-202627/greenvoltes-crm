@@ -281,45 +281,39 @@ export default function LeadsView({ userRole, currentUser }) {
       const pages = pdfDoc.getPages();
       const firstPage = pages[0];
 
-      // Draw white rectangles to cover previous dummy text on the NEW template
-      // Target area: X=340 to X=580 to cover the fields after the colons
+      // Draw precise white rectangles to erase baked-in dummy text on the NEW template
+      // The template follows a strict ~26 point vertical grid starting at Y=728 for Line 1.
+      const eraseLine = (yCenter) => {
+        firstPage.drawRectangle({ x: 275, y: yCenter - 10, width: 280, height: 20, color: rgb(1, 1, 1) });
+      };
 
-      // Cover #1 Name and #2 Consumer ID (just in case)
-      firstPage.drawRectangle({ x: 340, y: 700, width: 250, height: 50, color: rgb(1, 1, 1) });
-      
-      // Cover #4 Portal ID and #5 Jan Samarth (wipes dummy ARFFG and 15156161711818)
-      firstPage.drawRectangle({ x: 340, y: 640, width: 250, height: 45, color: rgb(1, 1, 1) });
-      
-      // Cover #6 Address (wipes dummy 3-line address: KANJANAPPILLY...)
-      firstPage.drawRectangle({ x: 340, y: 580, width: 250, height: 50, color: rgb(1, 1, 1) });
-      
-      // Cover #7 District (wipes dummy ERNAKULAM)
-      firstPage.drawRectangle({ x: 340, y: 560, width: 250, height: 18, color: rgb(1, 1, 1) });
-      
-      // Cover #9 Pincode (wipes dummy 682307)
-      firstPage.drawRectangle({ x: 340, y: 505, width: 250, height: 20, color: rgb(1, 1, 1) });
-
-      // Cover #15 Applied and #16 Installed Capacity
-      firstPage.drawRectangle({ x: 340, y: 240, width: 250, height: 60, color: rgb(1, 1, 1) });
-
-      // Cover Project Cost
-      firstPage.drawRectangle({ x: 340, y: 150, width: 250, height: 25, color: rgb(1, 1, 1) });
+      // Erase dummy data on specific lines
+      eraseLine(728); // #1 Name
+      eraseLine(702); // #2 Consumer ID
+      eraseLine(650); // #4 Portal ID
+      eraseLine(624); // #5 Jan Samarth
+      eraseLine(598); // #6 Address
+      eraseLine(572); // #7 District
+      eraseLine(520); // #9 Pincode
+      eraseLine(286); // #15 Applied Capacity
+      eraseLine(260); // #16 Installed Capacity
+      eraseLine(182); // #18 Project Cost
 
       // Embed Helvetica font
       const helveticaFont = await pdfDoc.embedFont('Helvetica');
 
       // Draw new text values
       firstPage.drawText(lead.name || '', {
-        x: 345,
-        y: 755,
+        x: 280,
+        y: 728, // #1 Name
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
       });
 
       firstPage.drawText(lead.consumerNumber || lead.id || '1234567890123', {
-        x: 345,
-        y: 728,
+        x: 280,
+        y: 702, // #2 Consumer ID
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
@@ -340,24 +334,24 @@ export default function LeadsView({ userRole, currentUser }) {
       };
 
       firstPage.drawText(cleanAddressFeasibility(lead.address), {
-        x: 345,
-        y: 624,
+        x: 280,
+        y: 598, // #6 Address
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
       });
 
       firstPage.drawText((lead.district || '').toUpperCase(), {
-        x: 345,
-        y: 571,
+        x: 280,
+        y: 572, // #7 District
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
       });
 
       firstPage.drawText(lead.pincode || '', {
-        x: 345,
-        y: 517,
+        x: 280,
+        y: 520, // #9 Pincode
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
@@ -377,32 +371,32 @@ export default function LeadsView({ userRole, currentUser }) {
       const projectCostVal = lead.projectCost !== undefined ? lead.projectCost : '2,25,000/-';
 
       firstPage.drawText(janSamarthId, {
-        x: 345,
-        y: 650,
+        x: 280,
+        y: 624, // #5 Jan Samarth
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
       });
 
       firstPage.drawText(appliedCapacity, {
-        x: 345,
-        y: 285,
+        x: 280,
+        y: 286, // #15 Applied Capacity
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
       });
 
       firstPage.drawText(installedCapacity, {
-        x: 345,
-        y: 255,
+        x: 280,
+        y: 260, // #16 Installed Capacity
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
       });
 
       firstPage.drawText(projectCostVal, {
-        x: 345,
-        y: 160,
+        x: 280,
+        y: 182, // #18 Project Cost
         size: 10,
         font: helveticaFont,
         color: rgb(0, 0, 0),
