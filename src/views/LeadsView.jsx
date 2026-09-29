@@ -281,23 +281,8 @@ export default function LeadsView({ userRole, currentUser }) {
       const pages = pdfDoc.getPages();
       const firstPage = pages[0];
 
-      // Draw precise white rectangles to erase baked-in dummy text on the NEW template
-      // The template follows a strict ~26 point vertical grid starting at Y=728 for Line 1.
-      const eraseLine = (yCenter) => {
-        firstPage.drawRectangle({ x: 275, y: yCenter - 10, width: 280, height: 20, color: rgb(1, 1, 1) });
-      };
-
-      // Erase dummy data on specific lines
-      eraseLine(728); // #1 Name
-      eraseLine(702); // #2 Consumer ID
-      eraseLine(650); // #4 Portal ID
-      eraseLine(624); // #5 Jan Samarth
-      eraseLine(598); // #6 Address
-      eraseLine(572); // #7 District
-      eraseLine(520); // #9 Pincode
-      eraseLine(286); // #15 Applied Capacity
-      eraseLine(260); // #16 Installed Capacity
-      eraseLine(182); // #18 Project Cost
+      // The template is now clean, so we don't need to erase any dummy data.
+      // We will just draw the text directly on the grid.
 
       // Embed Helvetica font
       const helveticaFont = await pdfDoc.embedFont('Helvetica');
