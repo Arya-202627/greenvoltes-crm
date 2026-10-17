@@ -6,6 +6,7 @@ import {
   Users, Handshake, ShieldCheck, BadgePercent, BadgeIndianRupee,
   Plus, UploadCloud, ChevronRight, Check, Ban
 } from 'lucide-react';
+import { processSignatureImage, dataUrlToFile } from '../utils/signatureProcessor';
 
 export default function DealersView({ userRole, currentUser }) {
   const [db, setDb] = useState(getDb());
@@ -31,7 +32,24 @@ export default function DealersView({ userRole, currentUser }) {
       
       try {
         setUploadProgress({ docKey, percent: 0 });
-        const uploadedData = await uploadFileToServer(file, (percent) => {
+
+        let uploadTargetFile = file;
+        let enhancedSigData = null;
+
+        // Automatically enhance uploaded signature images for crystal-clear clarity & brightness
+        if (docKey === 'signature' && file.type.startsWith('image/')) {
+          try {
+            enhancedSigData = await processSignatureImage(file);
+            if (enhancedSigData && enhancedSigData.dataUrl) {
+              const cleanFileName = (file.name || 'signature.png').replace(/\.[^.]+$/, '') + '_enhanced.png';
+              uploadTargetFile = dataUrlToFile(enhancedSigData.dataUrl, cleanFileName);
+            }
+          } catch (procErr) {
+            console.warn('Signature auto-enhancement skipped, uploading raw file:', procErr);
+          }
+        }
+
+        const uploadedData = await uploadFileToServer(uploadTargetFile, (percent) => {
           setUploadProgress({ docKey, percent });
         });
         
@@ -44,7 +62,8 @@ export default function DealersView({ userRole, currentUser }) {
               name: uploadedData.name,
               uploaded: true,
               originalName: uploadedData.originalName,
-              url: uploadedData.url
+              url: uploadedData.url,
+              ...(enhancedSigData?.dataUrl ? { dataUrl: enhancedSigData.dataUrl } : {})
             }
           };
           saveDb(updatedDb);

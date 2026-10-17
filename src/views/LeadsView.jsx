@@ -9,6 +9,7 @@ import {
   Search, Plus, FileText, CheckCircle2, ChevronRight, Edit3, Trash2,
   Phone, Mail, MapPin, UploadCloud, Check, UserPlus, X
 } from 'lucide-react';
+import { processSignatureImage, dataUrlToFile } from '../utils/signatureProcessor';
 
 // Helper to convert image URL to base64
 const loadImageAsBase64 = (url) => {
@@ -205,7 +206,24 @@ export default function LeadsView({ userRole, currentUser }) {
       
       try {
         setUploadProgress({ docKey, percent: 0 });
-        const uploadedData = await uploadFileToServer(file, (percent) => {
+
+        let uploadTargetFile = file;
+        let enhancedSigData = null;
+
+        // Automatically enhance uploaded signature images for crystal-clear clarity & brightness
+        if (docKey === 'signature' && file.type.startsWith('image/')) {
+          try {
+            enhancedSigData = await processSignatureImage(file);
+            if (enhancedSigData && enhancedSigData.dataUrl) {
+              const cleanFileName = (file.name || 'signature.png').replace(/\.[^.]+$/, '') + '_enhanced.png';
+              uploadTargetFile = dataUrlToFile(enhancedSigData.dataUrl, cleanFileName);
+            }
+          } catch (procErr) {
+            console.warn('Signature auto-enhancement skipped, uploading raw file:', procErr);
+          }
+        }
+
+        const uploadedData = await uploadFileToServer(uploadTargetFile, (percent) => {
           setUploadProgress({ docKey, percent });
         });
         const updatedLead = {
@@ -216,7 +234,8 @@ export default function LeadsView({ userRole, currentUser }) {
               name: uploadedData.name, 
               uploaded: true,
               originalName: uploadedData.originalName,
-              url: uploadedData.url
+              url: uploadedData.url,
+              ...(enhancedSigData?.dataUrl ? { dataUrl: enhancedSigData.dataUrl } : {})
             }
           }
         };
@@ -570,102 +589,10 @@ export default function LeadsView({ userRole, currentUser }) {
         color: rgb(0, 0, 0),
       });
 
-      // Helper function to make signature background transparent
-      const makeSignatureTransparent = (dataUrl) => {
-        return new Promise((resolve) => {
-          const img = new Image();
-          img.src = dataUrl;
-          img.onload = () => {
-            const canvas = document.createElement('canvas');
-            canvas.width = img.width;
-            canvas.height = img.height;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0);
-            
-            const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const data = imgData.data;
-            const width = canvas.width;
-            const height = canvas.height;
-            
-            // First pass: find min and max luminance to calculate a dynamic threshold
-            let minLuminance = 255;
-            let maxLuminance = 0;
-            
-            for (let i = 0; i < data.length; i += 4) {
-              const a = data[i+3];
-              if (a < 50) continue; // Skip transparent pixels
-              
-              const r = data[i];
-              const g = data[i+1];
-              const b = data[i+2];
-              const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
-              
-              if (luminance < minLuminance) minLuminance = luminance;
-              if (luminance > maxLuminance) maxLuminance = luminance;
-            }
-            
-            // Set dynamic threshold at 65% of contrast range
-            const threshold = minLuminance + (maxLuminance - minLuminance) * 0.65;
-            
-            // Second pass: isolate ink pixels and track signature bounding box bounds
-            let minX = width;
-            let minY = height;
-            let maxX = 0;
-            let maxY = 0;
-            
-            for (let y = 0; y < height; y++) {
-              for (let x = 0; x < width; x++) {
-                const i = (y * width + x) * 4;
-                const r = data[i];
-                const g = data[i+1];
-                const b = data[i+2];
-                const a = data[i+3];
-                const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
-                
-                // If pixel is transparent or light background paper, treat as background
-                if (a < 50 || luminance > threshold) {
-                  data[i+3] = 0; // Make transparent
-                } else {
-                  // Sharpen contrast for darker ink pixels
-                  data[i] = Math.max(0, r - 40);
-                  data[i+1] = Math.max(0, g - 40);
-                  data[i+2] = Math.max(0, b - 40);
-                  
-                  // Expand bounding box to fit the signature strokes
-                  if (x < minX) minX = x;
-                  if (y < minY) minY = y;
-                  if (x > maxX) maxX = x;
-                  if (y > maxY) maxY = y;
-                }
-              }
-            }
-            
-            ctx.putImageData(imgData, 0, 0);
-            
-            // If signature content was found, crop the empty borders
-            if (maxX > minX && maxY > minY) {
-              const padding = 6; // Add a small padding to prevent clipping edges
-              const cropX = Math.max(0, minX - padding);
-              const cropY = Math.max(0, minY - padding);
-              const cropW = Math.min(width - cropX, (maxX - minX) + padding * 2);
-              const cropH = Math.min(height - cropY, (maxY - minY) + padding * 2);
-              
-              const cropCanvas = document.createElement('canvas');
-              cropCanvas.width = cropW;
-              cropCanvas.height = cropH;
-              const cropCtx = cropCanvas.getContext('2d');
-              
-              // Draw the cropped region from original canvas to the cropped canvas
-              cropCtx.drawImage(canvas, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
-              resolve(cropCanvas.toDataURL('image/png'));
-            } else {
-              resolve(canvas.toDataURL('image/png'));
-            }
-          };
-          img.onerror = () => {
-            resolve(dataUrl);
-          };
-        });
+      // Helper function to make signature background transparent and enhance clarity/brightness
+      const makeSignatureTransparent = async (dataUrl) => {
+        const result = await processSignatureImage(dataUrl);
+        return result.dataUrl || dataUrl;
       };
 
       // Write Customer Name
@@ -749,26 +676,50 @@ export default function LeadsView({ userRole, currentUser }) {
         }
         if (sigDataUrl) {
           try {
-            const transparentSigDataUrl = await makeSignatureTransparent(sigDataUrl);
+            const enhancedSig = await processSignatureImage(sigDataUrl);
+            const transparentSigDataUrl = enhancedSig.dataUrl || sigDataUrl;
             const signatureBase64 = transparentSigDataUrl.split(',')[1];
             const signatureBytes = Uint8Array.from(atob(signatureBase64), c => c.charCodeAt(0));
             const pngImage = await pdfDoc.embedPng(signatureBytes);
 
-            // Draw signature image above "Please Sign Above" (X=85, W=80, H=30)
+            // Compute proportional dimensions preserving natural aspect ratio
+            const sigWidth = enhancedSig.width || pngImage.width || 100;
+            const sigHeight = enhancedSig.height || pngImage.height || 35;
+            const aspect = sigWidth / Math.max(1, sigHeight);
+
+            // Draw signature image above "Please Sign Above" on Page 4 (Max W=105, H=36)
+            const maxP4W = 105;
+            const maxP4H = 36;
+            let p4W = maxP4W;
+            let p4H = p4W / aspect;
+            if (p4H > maxP4H) {
+              p4H = maxP4H;
+              p4W = p4H * aspect;
+            }
+
             fourthPage.drawImage(pngImage, {
               x: 85,
               y: 416,
-              width: 80,
-              height: 30,
+              width: p4W,
+              height: p4H,
             });
 
-            // Draw signature image on Page 1, 2, and 3 footers
+            // Draw prominent signature image on Page 1, 2, and 3 footers above "First Party" (Max W=95, H=34)
+            const maxFooterW = 95;
+            const maxFooterH = 34;
+            let footerW = maxFooterW;
+            let footerH = footerW / aspect;
+            if (footerH > maxFooterH) {
+              footerH = maxFooterH;
+              footerW = footerH * aspect;
+            }
+
             for (let i = 0; i < 3; i++) {
               pages[i].drawImage(pngImage, {
                 x: 60,
-                y: 92,
-                width: 65,
-                height: 22,
+                y: 90,
+                width: footerW,
+                height: footerH,
               });
             }
           } catch (e) {
