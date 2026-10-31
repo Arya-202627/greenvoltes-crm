@@ -1170,10 +1170,10 @@ export default function LeadsView({ userRole, currentUser }) {
                 <h4>Generate Contracts & Reports</h4>
                 <p style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '8px' }}>Export official feasibility assessments and consumer-vendor agreements:</p>
                 <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
-                  <button className="btn btn-primary btn-sm" onClick={() => generateQuote(activeLead, 3)} style={{ flex: 1, backgroundColor: '#092a49', borderColor: '#092a49' }}>
+                  <button className="btn btn-white btn-sm" onClick={() => generateQuote(activeLead, 3)} style={{ flex: 1 }}>
                     <FileText size={12} /> Quote (3kW)
                   </button>
-                  <button className="btn btn-primary btn-sm" onClick={() => generateQuote(activeLead, 5)} style={{ flex: 1, backgroundColor: '#092a49', borderColor: '#092a49' }}>
+                  <button className="btn btn-white btn-sm" onClick={() => generateQuote(activeLead, 5)} style={{ flex: 1 }}>
                     <FileText size={12} /> Quote (5kW)
                   </button>
                 </div>
